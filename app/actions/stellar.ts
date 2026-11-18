@@ -14,26 +14,15 @@ let keypairCache: Keypair | null = null
 
 async function obtenerKeypair(): Promise<Keypair> {
   if (keypairCache) return keypairCache
-  const secretoEnv = process.env.STELLAR_SECRET_KEY
-  if (secretoEnv) {
-    keypairCache = Keypair.fromSecret(secretoEnv)
-    return keypairCache
-  }
-  const [fila] = await db.select().from(t.configStellar).where(eq(t.configStellar.id, "registro")).limit(1)
-  if (fila) {
-    keypairCache = Keypair.fromSecret(fila.claveSecreta)
-    return keypairCache
-  }
-  const nuevo = Keypair.random()
-  const res = await fetch(`https://friendbot.stellar.org/?addr=${nuevo.publicKey()}`)
-  if (!res.ok) throw new Error("Friendbot no pudo fondear la cuenta de testnet")
-  await db.insert(t.configStellar).values({ id: "registro", clavePublica: nuevo.publicKey(), claveSecreta: nuevo.secret() })
+  const secreto = process.env.STELLAR_SECRET_KEY
+  if (!secreto) throw new Error("Falta la variable de entorno STELLAR_SECRET_KEY")
+  const kp = Keypair.fromSecret(secreto)
   await db
-    .insert(t.cuentasStellar)
-    .values({ tipo: "registro", clavePublica: nuevo.publicKey(), balanceXLM: 10000, balanceUPT: 0 })
-    .onConflictDoUpdate({ target: t.cuentasStellar.tipo, set: { clavePublica: nuevo.publicKey() } })
-  keypairCache = nuevo
-  return nuevo
+    .insert(t.configStellar)
+    .values({ id: "registro", clavePublica: kp.publicKey() })
+    .onConflictDoUpdate({ target: t.configStellar.id, set: { clavePublica: kp.publicKey() } })
+  keypairCache = kp
+  return kp
 }
 
 function recortarBytes(texto: string, max: number) {

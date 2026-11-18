@@ -93,5 +93,4 @@ export const cuentasStellar = pgTable("cuentas_stellar", {
 export const configStellar = pgTable("config_stellar", {
   id: text("id").primaryKey(),
   clavePublica: text("clave_publica").notNull(),
-  claveSecreta: text("clave_secreta").notNull(),
 })
