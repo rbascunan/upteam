@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Gift, History, ImagePlus, LayoutDashboard, Layers, ShieldCheck, Target, Users, type LucideIcon } from "lucide-react"
+import { Gift, History, ImagePlus, LayoutDashboard, Layers, ShieldCheck, Target, Users, Wallet, type LucideIcon } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { STELLAR_RED } from "@/lib/stellar"
 import { cn } from "@/lib/utils"
@@ -14,6 +14,7 @@ export const NAVEGACION: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/reglas", label: "Reglas de puntos", icon: Target },
   { href: "/niveles", label: "Niveles", icon: Layers },
   { href: "/premios", label: "Premios", icon: Gift },
+  { href: "/wallet", label: "Wallet Stellar", icon: Wallet },
   { href: "/administracion", label: "Administración", icon: ShieldCheck },
 ]
 
