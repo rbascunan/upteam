@@ -14,7 +14,7 @@ import type {
   Premio,
 } from "@/lib/types"
 import { repositorio } from "@/lib/data/repositorio"
-import { puede, type Permiso } from "@/lib/data/calculos"
+import { nivelInicial, puede, type Permiso } from "@/lib/data/calculos"
 import { registrarMovimientoEnStellar, registrarPagoPremioEnStellar } from "@/lib/stellar"
 import { generarId, hoyISO } from "@/lib/format"
 import { toast } from "sonner"
@@ -144,20 +144,40 @@ function useAcciones(
         return registrarEnStellar([reverso.id])
       },
 
-      guardarEmbajador: (emb: Omit<Embajador, "id"> & { id?: string }) => {
+      guardarEmbajador: (emb: Omit<Embajador, "id" | "nivelId"> & { id?: string; nivelId?: string }) => {
         const id = emb.id ?? generarId("emb")
         actualizar((e) => {
-          const existe = e.embajadores.some((x) => x.id === id)
-          const lista = existe ? e.embajadores.map((x) => (x.id === id ? { ...emb, id } : x)) : [{ ...emb, id }, ...e.embajadores]
-          return conBitacora({ ...e, embajadores: lista }, existe ? "Editó embajador" : "Creó embajador", "embajador", emb.nombre)
+          const previo = e.embajadores.find((x) => x.id === id)
+          const nivelId = emb.nivelId ?? previo?.nivelId ?? nivelInicial(e.niveles)?.id ?? "niv-explorador"
+          const nuevo: Embajador = { ...emb, id, nivelId }
+          const lista = previo ? e.embajadores.map((x) => (x.id === id ? nuevo : x)) : [nuevo, ...e.embajadores]
+          return conBitacora({ ...e, embajadores: lista }, previo ? "Editó embajador" : "Creó embajador", "embajador", emb.nombre)
         })
         return id
       },
 
-      importarEmbajadores: (lista: Omit<Embajador, "id">[]) =>
+      asignarNivel: (embajadorId: string, nivelId: string) =>
+        actualizar((e) => {
+          const nivel = e.niveles.find((n) => n.id === nivelId)
+          if (!nivel) return e
+          return conBitacora(
+            { ...e, embajadores: e.embajadores.map((x) => (x.id === embajadorId ? { ...x, nivelId } : x)) },
+            "Cambió nivel",
+            "embajador",
+            `${nombreEmb(e, embajadorId)} · ${nivel.nombre}`,
+          )
+        }),
+
+      importarEmbajadores: (lista: Omit<Embajador, "id" | "nivelId">[]) =>
         actualizar((e) =>
           conBitacora(
-            { ...e, embajadores: [...lista.map((x) => ({ ...x, id: generarId("emb") })), ...e.embajadores] },
+            {
+              ...e,
+              embajadores: [
+                ...lista.map((x) => ({ ...x, id: generarId("emb"), nivelId: nivelInicial(e.niveles)?.id ?? "niv-explorador" })),
+                ...e.embajadores,
+              ],
+            },
             "Importó embajadores",
             "embajador",
             `${lista.length} embajadores desde archivo`,

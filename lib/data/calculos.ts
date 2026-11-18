@@ -26,16 +26,18 @@ export function nivelesOrdenados(niveles: Nivel[]) {
   return [...niveles].sort((a, b) => a.puntosMinimos - b.puntosMinimos || a.orden - b.orden)
 }
 
-export function nivelPara(puntos: number, niveles: Nivel[]): Nivel | null {
-  const orden = nivelesOrdenados(niveles)
-  let actual: Nivel | null = orden[0] ?? null
-  for (const n of orden) if (puntos >= n.puntosMinimos) actual = n
-  return actual
+export function nivelInicial(niveles: Nivel[]): Nivel | null {
+  return nivelesOrdenados(niveles)[0] ?? null
 }
 
-export function progresoNivel(puntos: number, niveles: Nivel[]) {
+/** El nivel se asigna manualmente; si el nivel asignado ya no existe se usa el inicial. */
+export function nivelDe(embajador: Pick<Embajador, "nivelId">, niveles: Nivel[]): Nivel | null {
+  return niveles.find((n) => n.id === embajador.nivelId) ?? nivelInicial(niveles)
+}
+
+export function progresoNivel(puntos: number, embajador: Pick<Embajador, "nivelId">, niveles: Nivel[]) {
   const orden = nivelesOrdenados(niveles)
-  const actual = nivelPara(puntos, niveles)
+  const actual = nivelDe(embajador, niveles)
   const idx = actual ? orden.findIndex((n) => n.id === actual.id) : -1
   const siguiente = orden[idx + 1] ?? null
   if (!actual || !siguiente) return { actual, siguiente: null, porcentaje: 100, faltan: 0 }
@@ -64,14 +66,13 @@ export function ranking(
   limite = 10,
 ): FilaRanking[] {
   const delPeriodo = puntosPorEmbajador(movimientos, periodo)
-  const totales = puntosPorEmbajador(movimientos)
   return embajadores
     .filter((e) => e.estado === "activo")
     .map((embajador) => ({ embajador, puntos: delPeriodo.get(embajador.id) ?? 0 }))
     .filter((f) => f.puntos > 0)
     .sort((a, b) => b.puntos - a.puntos || a.embajador.nombre.localeCompare(b.embajador.nombre))
     .slice(0, limite)
-    .map((f, i) => ({ ...f, posicion: i + 1, nivel: nivelPara(totales.get(f.embajador.id) ?? 0, niveles) }))
+    .map((f, i) => ({ ...f, posicion: i + 1, nivel: nivelDe(f.embajador, niveles) }))
 }
 
 export function mesesDisponibles(movimientos: Movimiento[], hoy = new Date()) {

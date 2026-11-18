@@ -12,7 +12,7 @@ import { EncabezadoPagina, Panel, Chip, EstadoVacio } from "@/components/shared/
 import { ICONOS_NIVEL, IconoNivelBox } from "@/components/shared/nivel-badge"
 import { ConfirmarDialog } from "@/components/shared/confirmar-dialog"
 import { useDatos } from "@/lib/store"
-import { nivelPara, nivelesOrdenados, puntosPorEmbajador } from "@/lib/data/calculos"
+import { nivelDe, nivelesOrdenados, puntosPorEmbajador } from "@/lib/data/calculos"
 import { formatearNumero } from "@/lib/format"
 import type { IconoNivel, Nivel } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -26,12 +26,11 @@ export function NivelesView() {
   const ordenados = nivelesOrdenados(niveles)
 
   const conteo = useMemo(() => {
-    const totales = puntosPorEmbajador(movimientos)
     const map = new Map<string, number>()
     embajadores
       .filter((e) => e.estado === "activo")
       .forEach((e) => {
-        const n = nivelPara(totales.get(e.id) ?? 0, niveles)
+        const n = nivelDe(e, niveles)
         if (n) map.set(n.id, (map.get(n.id) ?? 0) + 1)
       })
     return map
@@ -41,7 +40,7 @@ export function NivelesView() {
     <>
       <EncabezadoPagina
         titulo="Niveles"
-        descripcion="Los embajadores suben de nivel automáticamente al alcanzar los puntos mínimos."
+        descripcion="Todos inician como Explorador. El nivel de cada embajador se cambia manualmente desde su ficha; los puntos mínimos son una referencia."
         acciones={
           editable && (
             <NivelDialog

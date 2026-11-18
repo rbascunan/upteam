@@ -20,7 +20,7 @@ Diego Ramírez,MX,02/11,diegor,`
 
 interface FilaImportada {
   linea: number
-  datos: Omit<Embajador, "id"> | null
+  datos: Omit<Embajador, "id" | "nivelId"> | null
   errores: string[]
 }
 

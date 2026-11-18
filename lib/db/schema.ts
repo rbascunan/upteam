@@ -25,6 +25,7 @@ export const embajadores = pgTable("embajadores", {
   wallet: text("wallet"),
   fechaIngreso: date("fecha_ingreso", { mode: "string" }).notNull(),
   estado: text("estado").notNull(),
+  nivelId: text("nivel_id").notNull().default("niv-explorador"),
 })
 
 export const actividades = pgTable("actividades", {

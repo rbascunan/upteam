@@ -18,7 +18,7 @@ import { EmbajadorFormDialog } from "@/components/embajadores/embajador-form-dia
 import { ImportarDialog } from "@/components/embajadores/importar-dialog"
 import { useDatos } from "@/lib/store"
 import { CODIGOS_PAIS, PAISES } from "@/lib/data/paises"
-import { nivelPara, nivelesOrdenados, puntosPorEmbajador } from "@/lib/data/calculos"
+import { nivelDe, nivelesOrdenados, puntosPorEmbajador } from "@/lib/data/calculos"
 import { formatearFecha, formatearNumero, normalizarTexto } from "@/lib/format"
 import { abreviarHash } from "@/lib/stellar"
 import { descargarCSV } from "@/lib/exportar"
@@ -39,7 +39,7 @@ export function EmbajadoresView() {
     const mes = puntosPorEmbajador(movimientos, { tipo: "mes", anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 })
     const t = normalizarTexto(q)
     return embajadores
-      .map((e) => ({ e, total: totales.get(e.id) ?? 0, mes: mes.get(e.id) ?? 0, nivel: nivelPara(totales.get(e.id) ?? 0, niveles) }))
+      .map((e) => ({ e, total: totales.get(e.id) ?? 0, mes: mes.get(e.id) ?? 0, nivel: nivelDe(e, niveles) }))
       .filter(
         (f) =>
           (!t || normalizarTexto(f.e.nombre).includes(t) || normalizarTexto(f.e.telegram ?? "").includes(t.replace("@", ""))) &&

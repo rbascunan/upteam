@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
 import { Panel, PanelHeader } from "@/components/shared/ui-bits"
 import { useDatos } from "@/lib/store"
-import { nivelPara, nivelesOrdenados, puntosPorEmbajador, puntosTotales } from "@/lib/data/calculos"
+import { nivelDe, nivelesOrdenados, puntosPorEmbajador, puntosTotales } from "@/lib/data/calculos"
 import { formatearNumero, nombreMes } from "@/lib/format"
 
 function TooltipSimple({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
@@ -55,7 +55,7 @@ export function DistribucionNiveles() {
     const activos = embajadores.filter((e) => e.estado === "activo")
     const conteo = new Map<string, number>()
     for (const e of activos) {
-      const n = nivelPara(puntos.get(e.id) ?? 0, niveles)
+      const n = nivelDe(e, niveles)
       if (n) conteo.set(n.id, (conteo.get(n.id) ?? 0) + 1)
     }
     return nivelesOrdenados(niveles).map((n) => ({

@@ -13,13 +13,15 @@ import { SumarPuntosDialog } from "@/components/embajadores/sumar-puntos-dialog"
 import { EmbajadorFormDialog } from "@/components/embajadores/embajador-form-dialog"
 import { RevertirDialog } from "@/components/registro/revertir-dialog"
 import { useDatos } from "@/lib/store"
-import { progresoNivel, puntosPorEmbajador } from "@/lib/data/calculos"
+import { nivelesOrdenados, progresoNivel, puntosPorEmbajador } from "@/lib/data/calculos"
+import { SimpleSelect } from "@/components/shared/simple-select"
+import { toast } from "sonner"
 import { formatearFecha, formatearNumero, nombreMes } from "@/lib/format"
 import { abreviarHash, urlCuenta, urlTransaccion } from "@/lib/stellar"
 import { cn } from "@/lib/utils"
 
 export function FichaView({ id }: { id: string }) {
-  const { embajadores, movimientos, niveles, actividades, premios, admins, permitido } = useDatos()
+  const { embajadores, movimientos, niveles, actividades, premios, admins, permitido, acciones } = useDatos()
   const [tab, setTab] = useState<"historial" | "premios">("historial")
   const [revertirId, setRevertirId] = useState<string | null>(null)
   const emb = embajadores.find((e) => e.id === id)
@@ -41,7 +43,7 @@ export function FichaView({ id }: { id: string }) {
   const hoy = new Date()
   const delMes = puntosPorEmbajador(movimientos, { tipo: "mes", anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 }).get(emb.id) ?? 0
   const delAnio = puntosPorEmbajador(movimientos, { tipo: "anio", anio: hoy.getFullYear() }).get(emb.id) ?? 0
-  const prog = progresoNivel(total, niveles)
+  const prog = progresoNivel(total, emb, niveles)
   const historial = movimientos.filter((m) => m.embajadorId === emb.id)
   const susPremios = premios.filter((p) => p.embajadorId === emb.id)
 
@@ -130,7 +132,20 @@ export function FichaView({ id }: { id: string }) {
                   {prog.siguiente ? `Faltan ${formatearNumero(prog.faltan)} puntos para ${prog.siguiente.nombre}` : "Nivel máximo alcanzado"}
                 </p>
               </div>
-              <span className="text-sm font-bold tabular-nums">{prog.porcentaje}%</span>
+              {permitido("gestionar_embajadores") ? (
+                <SimpleSelect
+                  value={prog.actual?.id ?? ""}
+                  onChange={(nivelId) => {
+                    acciones.asignarNivel(emb.id, nivelId)
+                    toast.success(`Nivel actualizado a ${niveles.find((n) => n.id === nivelId)?.nombre ?? nivelId}`)
+                  }}
+                  opciones={nivelesOrdenados(niveles).map((n) => ({ value: n.id, label: n.nombre }))}
+                  ariaLabel="Cambiar nivel del embajador"
+                  className="w-48"
+                />
+              ) : (
+                <span className="text-sm font-bold tabular-nums">{prog.porcentaje}%</span>
+              )}
             </div>
             <BarraProgreso valor={prog.porcentaje} color={prog.siguiente?.color ?? prog.actual?.color} className="mt-3" etiqueta="Progreso al siguiente nivel" />
             {prog.actual && prog.actual.beneficios.length > 0 && (

@@ -25,6 +25,7 @@ export interface Embajador {
   wallet: string | null
   fechaIngreso: string
   estado: EstadoEmbajador
+  nivelId: string
 }
 
 export interface Actividad {

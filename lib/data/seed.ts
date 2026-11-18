@@ -148,6 +148,7 @@ export function generarDatosEjemplo(hoy: Date = new Date()): EstadoApp {
       wallet: random() < 0.78 ? generarClavePublicaFalsa(random) : null,
       fechaIngreso: aISOFecha(ingreso),
       estado: i === 37 || i === 39 ? "inactivo" : "activo",
+      nivelId: "niv-explorador",
     }
   })
 
