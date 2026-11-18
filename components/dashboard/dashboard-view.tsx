@@ -46,7 +46,7 @@ export function DashboardView() {
     <>
       <EncabezadoPagina
         titulo={`Hola, equipo de ${comunidad.nombre}`}
-        descripcion={`Resumen de ${nombreMes(periodoMes.mes).toLowerCase()} ${periodoMes.anio}. Todos los puntos se registran como tokens UPT en Stellar Testnet.`}
+        descripcion={`Resumen de ${nombreMes(periodoMes.mes).toLowerCase()} ${periodoMes.anio}. Todos los puntos se registran como StellarPoints en Stellar Testnet.`}
         acciones={
           permitido("cargar_puntos") && (
             <SumarPuntosDialog
@@ -115,7 +115,7 @@ export function DashboardView() {
                 </div>
                 <span className={m.puntos < 0 ? "text-sm font-bold text-destructive tabular-nums" : "text-sm font-bold text-success tabular-nums"}>
                   {m.puntos > 0 ? "+" : ""}
-                  {m.puntos} UPT
+                  {m.puntos} StellarPoints
                 </span>
                 <StellarChip txHash={m.txHash} estado={m.estadoBlockchain} movimientoId={m.id} />
               </li>

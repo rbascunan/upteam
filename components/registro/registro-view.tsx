@@ -63,7 +63,7 @@ export function RegistroView() {
     <>
       <EncabezadoPagina
         titulo="Registro de puntos"
-        descripcion="Historial completo de movimientos. Cada uno corresponde a una transacción de tokens UPT en Stellar Testnet."
+        descripcion="Historial completo de movimientos. Cada uno corresponde a una transacción de StellarPoints en Stellar Testnet."
         acciones={
           <>
             <Button
@@ -81,7 +81,7 @@ export function RegistroView() {
               variant="outline"
               className="h-10 rounded-xl"
               onClick={() => {
-                const ok = exportarPDF(`Registro de puntos · ${comunidad.nombre}`, `${filas.length} movimientos · ${formatearNumero(suma)} UPT netos`, columnas, datosExport())
+                const ok = exportarPDF(`Registro de puntos · ${comunidad.nombre}`, `${filas.length} movimientos · ${formatearNumero(suma)} StellarPoints netos`, columnas, datosExport())
                 if (!ok) toast.error("Permite las ventanas emergentes para exportar el PDF")
               }}
             >
@@ -157,7 +157,7 @@ export function RegistroView() {
         <div className="flex items-center justify-between px-4 py-2.5 text-xs text-muted-foreground">
           <span>{filas.length} movimientos</span>
           <span>
-            Neto: <strong className="text-foreground tabular-nums">{formatearNumero(suma)} UPT</strong>
+            Neto: <strong className="text-foreground tabular-nums">{formatearNumero(suma)} StellarPoints</strong>
           </span>
         </div>
 

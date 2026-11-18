@@ -27,6 +27,17 @@ export function StellarChip({ txHash, estado, movimientoId, onReintentar, classN
     )
   }
 
+  if (estado === "historico") {
+    return (
+      <span
+        title="Movimiento importado antes de conectar Stellar Testnet"
+        className={cn("inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground", className)}
+      >
+        Histórico
+      </span>
+    )
+  }
+
   if (estado === "error" || !txHash) {
     const reintentar = async () => {
       if (onReintentar) return onReintentar()

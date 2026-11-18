@@ -106,7 +106,7 @@ export function RankingWidget() {
                 </span>
                 <span className="text-right">
                   <span className="block text-sm font-bold tabular-nums">{formatearNumero(f.puntos)}</span>
-                  <span className="block text-[11px] text-muted-foreground">UPT</span>
+                  <span className="block text-[11px] text-muted-foreground">StellarPoints</span>
                 </span>
               </Link>
             </li>

@@ -89,3 +89,9 @@ export const cuentasStellar = pgTable("cuentas_stellar", {
   balanceXLM: numeric("balance_xlm", { precision: 20, scale: 7, mode: "number" }).notNull(),
   balanceUPT: numeric("balance_upt", { precision: 20, scale: 7, mode: "number" }).notNull(),
 })
+
+export const configStellar = pgTable("config_stellar", {
+  id: text("id").primaryKey(),
+  clavePublica: text("clave_publica").notNull(),
+  claveSecreta: text("clave_secreta").notNull(),
+})

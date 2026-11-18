@@ -25,7 +25,7 @@ export function RevertirDialog({ movimientoId, onCerrar }: { movimientoId: strin
       titulo="Revertir movimiento"
       descripcion={
         mov
-          ? `Se registrará un movimiento compensatorio de ${-mov.puntos} UPT para ${emb?.nombre}. La transacción original queda intacta en Stellar.`
+          ? `Se registrará un movimiento compensatorio de ${-mov.puntos} StellarPoints para ${emb?.nombre}. La transacción original queda intacta en Stellar.`
           : undefined
       }
       textoConfirmar="Revertir"

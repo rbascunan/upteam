@@ -1,10 +1,10 @@
 export type CodigoPais = "MX" | "CO" | "CR" | "BO" | "AR" | "PE" | "EC" | "XX"
 
-export type EstadoBlockchain = "pendiente" | "confirmado" | "error"
+export type EstadoBlockchain = "pendiente" | "confirmado" | "error" | "historico"
 export type EstadoEmbajador = "activo" | "inactivo"
 export type EstadoPremio = "pendiente" | "aprobado" | "pagado"
 export type RolAdmin = "super_admin" | "admin"
-export type MonedaPremio = "XLM" | "USDC" | "UPT"
+export type MonedaPremio = "XLM" | "USDC" | "StellarPoints"
 export type IconoNivel = "compass" | "handshake" | "sparkles" | "crown" | "star" | "rocket" | "shield" | "gem"
 
 export interface Comunidad {
@@ -47,7 +47,7 @@ export interface Movimiento {
   cargadoPor: string
   txHash: string | null
   estadoBlockchain: EstadoBlockchain
-  token: "UPT"
+  token: "StellarPoints"
   revierteA: string | null
   revertidoPor: string | null
   creadoEn: string
@@ -91,7 +91,7 @@ export interface EntradaBitacora {
 }
 
 export interface CuentaStellar {
-  tipo: "emisora" | "distribuidora"
+  tipo: "registro"
   clavePublica: string
   balanceXLM: number
   balanceUPT: number

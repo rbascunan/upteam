@@ -60,7 +60,7 @@ export function SumarPuntosDialog({ trigger, embajadorIdsIniciales = [], abierto
     const t = toast.loading(`Registrando ${ids.length} movimiento${ids.length === 1 ? "" : "s"} en Stellar…`)
     const r = await acciones.registrarEnStellar(ids)
     if (r.fallidos) toast.error(`${r.fallidos} de ${r.total} no se pudieron registrar. Puedes reintentar desde el registro.`, { id: t })
-    else toast.success(`${puntosNum * ids.length} UPT emitidos a ${ids.length} embajador${ids.length === 1 ? "" : "es"}`, { id: t })
+    else toast.success(`${puntosNum * ids.length} StellarPoints emitidos a ${ids.length} embajador${ids.length === 1 ? "" : "es"}`, { id: t })
   }
 
   return (
@@ -70,7 +70,7 @@ export function SumarPuntosDialog({ trigger, embajadorIdsIniciales = [], abierto
         <form onSubmit={enviar} className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle>Sumar puntos</DialogTitle>
-            <DialogDescription>Cada embajador seleccionado recibe los puntos como tokens UPT en Stellar Testnet.</DialogDescription>
+            <DialogDescription>Cada embajador seleccionado recibe los puntos como StellarPoints en Stellar Testnet.</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-2">
@@ -145,7 +145,7 @@ export function SumarPuntosDialog({ trigger, embajadorIdsIniciales = [], abierto
               Cancelar
             </Button>
             <Button type="submit" disabled={!valido} className="glow-primary">
-              Sumar {valido ? puntosNum * seleccion.length : ""} UPT
+              Sumar {valido ? puntosNum * seleccion.length : ""} StellarPoints
             </Button>
           </DialogFooter>
         </form>

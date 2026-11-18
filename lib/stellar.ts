@@ -1,15 +1,11 @@
-import type { Movimiento, Premio } from "@/lib/types"
-
 /**
- * Integración con Stellar (SIMULADA).
- * Toda la lógica on-chain vive aquí para reemplazarla luego por llamadas reales
- * a Stellar Testnet (Horizon / Soroban) sin tocar la UI.
+ * Utilidades de Stellar compartidas por cliente y servidor.
+ * El envío real de transacciones a Stellar Testnet vive en app/actions/stellar.ts.
  */
 
 export const STELLAR_RED = "Stellar Testnet"
-export const STELLAR_TOKEN = "UPT"
+export const STELLAR_TOKEN = "StellarPoints"
 const EXPLORER_BASE = "https://stellar.expert/explorer/testnet"
-const TASA_FALLO_SIMULADA = 0.08
 
 export type ResultadoStellar = { ok: true; txHash: string } | { ok: false; error: string }
 
@@ -37,32 +33,4 @@ export function urlCuenta(clavePublica: string) {
 export function abreviarHash(hash: string, inicio = 4, fin = 4) {
   if (hash.length <= inicio + fin) return hash
   return `${hash.slice(0, inicio)}…${hash.slice(-fin)}`
-}
-
-const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
-async function simularTransaccion(): Promise<ResultadoStellar> {
-  await esperar(900 + Math.random() * 900)
-  if (Math.random() < TASA_FALLO_SIMULADA) {
-    return { ok: false, error: "tx_failed: timeout al enviar a Horizon (simulado)" }
-  }
-  return { ok: true, txHash: generarHashFalso() }
-}
-
-/** Registra un movimiento de puntos (UPT) en Stellar Testnet. Simulado. */
-export async function registrarMovimientoEnStellar(
-  movimiento: Pick<Movimiento, "id" | "embajadorId" | "puntos">,
-): Promise<ResultadoStellar> {
-  void movimiento
-  return simularTransaccion()
-}
-
-/** Registra el pago de un premio a la wallet del embajador. Simulado. */
-export async function registrarPagoPremioEnStellar(
-  premio: Pick<Premio, "id" | "monto" | "moneda">,
-  walletDestino: string,
-): Promise<ResultadoStellar> {
-  void premio
-  void walletDestino
-  return simularTransaccion()
 }

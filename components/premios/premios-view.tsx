@@ -232,7 +232,7 @@ function PremioDialog({ trigger }: { trigger: React.ReactElement }) {
                 id="pr-moneda"
                 value={f.moneda}
                 onChange={(v) => setF({ ...f, moneda: v as MonedaPremio })}
-                opciones={(["XLM", "USDC", "UPT"] as const).map((m) => ({ value: m, label: m }))}
+                opciones={(["XLM", "USDC", "StellarPoints"] as const).map((m) => ({ value: m, label: m }))}
               />
             </div>
           </div>

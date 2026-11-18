@@ -117,7 +117,7 @@ export function FichaView({ id }: { id: string }) {
               <div key={label} className="neu-inset rounded-2xl bg-muted/40 px-4 py-3">
                 <p className="text-xs text-muted-foreground">{label}</p>
                 <p className="text-xl font-bold tabular-nums">
-                  {formatearNumero(Number(v))} <span className="text-xs font-medium text-muted-foreground">UPT</span>
+                  {formatearNumero(Number(v))} <span className="text-xs font-medium text-muted-foreground">StellarPoints</span>
                 </p>
               </div>
             ))}
@@ -177,7 +177,7 @@ export function FichaView({ id }: { id: string }) {
               <div className="mt-auto pt-5">
                 <p className="text-xs text-muted-foreground">Balance on-chain</p>
                 <p className="text-3xl font-bold tabular-nums">
-                  {formatearNumero(total)} <span className="text-sm text-muted-foreground">UPT</span>
+                  {formatearNumero(total)} <span className="text-sm text-muted-foreground">StellarPoints</span>
                 </p>
               </div>
             </>

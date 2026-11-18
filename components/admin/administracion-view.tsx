@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowUpRight, Coins, Plus, ScrollText, Settings, ShieldCheck, Trash2, UserCog, Wallet } from "lucide-react"
+import { ArrowUpRight, Plus, ScrollText, Settings, ShieldCheck, Trash2, UserCog, Wallet } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -209,16 +209,18 @@ function AdminDialog({ trigger }: { trigger: React.ReactElement }) {
 
 function CuentasStellar() {
   const { cuentas, movimientos } = useDatos()
-  const emitidos = movimientos.filter((m) => m.estadoBlockchain === "confirmado").reduce((s, m) => s + m.puntos, 0)
+  const confirmados = movimientos.filter((m) => m.estadoBlockchain === "confirmado")
+  const registrados = confirmados.length
+  const emitidos = confirmados.reduce((s, m) => s + m.puntos, 0)
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
       {cuentas.map((c) => (
         <Panel key={c.tipo}>
           <PanelHeader
-            titulo={c.tipo === "emisora" ? "Cuenta emisora" : "Cuenta distribuidora"}
-            descripcion={c.tipo === "emisora" ? `Emite el token ${STELLAR_TOKEN}` : "Envía tokens y premios a los embajadores"}
-            acciones={<IconBox icon={c.tipo === "emisora" ? Coins : Wallet} tono={c.tipo === "emisora" ? "orange" : "primary"} />}
+            titulo="Cuenta de registro"
+            descripcion={`Registra cada movimiento de ${STELLAR_TOKEN} en ${STELLAR_RED} sin enviar fondos`}
+            acciones={<IconBox icon={Wallet} tono="primary" />}
           />
           <p className="neu-inset rounded-2xl bg-muted/40 p-3 font-mono text-xs break-all">{c.clavePublica}</p>
           <div className="mt-3 flex gap-2">
@@ -236,8 +238,8 @@ function CuentasStellar() {
               <p className="text-xl font-bold tabular-nums">{formatearNumero(c.balanceXLM, 2)}</p>
             </div>
             <div className="rounded-2xl bg-muted/50 px-4 py-3">
-              <p className="text-xs text-muted-foreground">{STELLAR_TOKEN}</p>
-              <p className="text-xl font-bold tabular-nums">{c.tipo === "emisora" ? "∞" : formatearNumero(c.balanceUPT)}</p>
+              <p className="text-xs text-muted-foreground">Movimientos registrados</p>
+              <p className="text-xl font-bold tabular-nums">{formatearNumero(registrados)}</p>
             </div>
           </div>
         </Panel>
@@ -248,7 +250,7 @@ function CuentasStellar() {
           <div className="min-w-0 flex-1">
             <p className="font-semibold">Red: {STELLAR_RED}</p>
             <p className="text-sm text-muted-foreground">
-              {formatearNumero(emitidos)} {STELLAR_TOKEN} en circulación entre los embajadores. Las claves secretas nunca se muestran en el panel.
+              {formatearNumero(emitidos)} {STELLAR_TOKEN} netos registrados on-chain como constancia (no se envían tokens). Las claves secretas nunca se muestran en el panel.
             </p>
           </div>
           <Chip tono="success">Conectado</Chip>

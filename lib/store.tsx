@@ -15,7 +15,8 @@ import type {
 } from "@/lib/types"
 import { repositorio } from "@/lib/data/repositorio"
 import { nivelInicial, puede, type Permiso } from "@/lib/data/calculos"
-import { registrarMovimientoEnStellar, registrarPagoPremioEnStellar } from "@/lib/stellar"
+import type { ResultadoStellar } from "@/lib/stellar"
+import { registrarMovimientosStellar, registrarPremioStellar } from "@/app/actions/stellar"
 import { generarId, hoyISO } from "@/lib/format"
 import { toast } from "sonner"
 
@@ -65,7 +66,13 @@ function useAcciones(
         ...e,
         movimientos: e.movimientos.map((m) => (ids.includes(m.id) ? { ...m, estadoBlockchain: "pendiente" } : m)),
       }))
-      const resultados = await Promise.all(movs.map(async (m) => ({ id: m.id, r: await registrarMovimientoEnStellar(m) })))
+      let resultados: { id: string; r: ResultadoStellar }[]
+      try {
+        const res = await registrarMovimientosStellar(movs.map(({ id, embajadorId, puntos }) => ({ id, embajadorId, puntos })))
+        resultados = res.map((x) => ({ id: x.id, r: x.resultado }))
+      } catch {
+        resultados = movs.map((m) => ({ id: m.id, r: { ok: false, error: "No se pudo contactar a Stellar" } }))
+      }
       actualizar((e) => ({
         ...e,
         movimientos: e.movimientos.map((m) => {
@@ -94,7 +101,7 @@ function useAcciones(
           cargadoPor: estadoRef.current?.adminActualId ?? "",
           txHash: null,
           estadoBlockchain: "pendiente",
-          token: "UPT",
+          token: "StellarPoints",
           revierteA: null,
           revertidoPor: null,
           creadoEn,
@@ -260,9 +267,10 @@ function useAcciones(
       pagarPremio: async (id: string) => {
         const e0 = estadoRef.current
         const premio = e0?.premios.find((p) => p.id === id)
-        const wallet = e0?.embajadores.find((x) => x.id === premio?.embajadorId)?.wallet
-        if (!premio || !wallet) return { ok: false as const, error: "El embajador no tiene wallet registrada" }
-        const r = await registrarPagoPremioEnStellar(premio, wallet)
+        if (!premio) return { ok: false as const, error: "Premio no encontrado" }
+        const r: ResultadoStellar = await registrarPremioStellar({ id: premio.id, monto: premio.monto, moneda: premio.moneda }).catch(
+          () => ({ ok: false as const, error: "No se pudo contactar a Stellar" }),
+        )
         if (r.ok) {
           actualizar((e) =>
             conBitacora(

@@ -63,7 +63,7 @@ export function EmbajadorFormDialog({ trigger, embajador }: { trigger: React.Rea
         <form onSubmit={guardar} className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle>{embajador ? "Editar embajador" : "Nuevo embajador"}</DialogTitle>
-            <DialogDescription>Los datos de contacto y la wallet de Stellar donde recibirá los tokens UPT.</DialogDescription>
+            <DialogDescription>Los datos de contacto y la wallet de Stellar donde recibirá los StellarPoints.</DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-2">

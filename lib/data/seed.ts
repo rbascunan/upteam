@@ -178,7 +178,7 @@ export function generarDatosEjemplo(hoy: Date = new Date()): EstadoApp {
           cargadoPor: ADMINS[Math.floor(random() * ADMINS.length)].id,
           txHash: generarHashFalso(random),
           estadoBlockchain: "confirmado",
-          token: "UPT",
+          token: "StellarPoints",
           revierteA: null,
           revertidoPor: null,
           creadoEn: `${fecha}T${String(9 + Math.floor(random() * 10)).padStart(2, "0")}:${String(Math.floor(random() * 60)).padStart(2, "0")}:00`,
@@ -199,7 +199,7 @@ export function generarDatosEjemplo(hoy: Date = new Date()): EstadoApp {
     ["Top 1 del mes", 150, "XLM"],
     ["Apoyo en hackathon", 100, "USDC"],
     ["Top 2 del mes", 100, "XLM"],
-    ["Bono de liderazgo", 250, "UPT"],
+    ["Bono de liderazgo", 250, "StellarPoints"],
   ] as const
   const premios: Premio[] = conceptos.map(([concepto, monto, moneda], i) => {
     const estado = i < 5 ? "pagado" : i < 7 ? "aprobado" : "pendiente"
@@ -225,8 +225,7 @@ export function generarDatosEjemplo(hoy: Date = new Date()): EstadoApp {
   ]
 
   const cuentas: CuentaStellar[] = [
-    { tipo: "emisora", clavePublica: generarClavePublicaFalsa(random), balanceXLM: 10000, balanceUPT: 0 },
-    { tipo: "distribuidora", clavePublica: generarClavePublicaFalsa(random), balanceXLM: 4823.55, balanceUPT: 985000 },
+    { tipo: "registro", clavePublica: generarClavePublicaFalsa(random), balanceXLM: 10000, balanceUPT: 0 },
   ]
 
   return {
