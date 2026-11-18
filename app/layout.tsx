@@ -1,35 +1,27 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { Inter, Geist_Mono } from 'next/font/google'
+import { ThemeProvider } from 'next-themes'
+import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { AppProvider } from '@/lib/store'
 import './globals.css'
 
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
+
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'Upteam · Programa de embajadores',
+  description:
+    'Upteam centraliza embajadores, puntos, niveles, premios y cumpleaños de tu comunidad, con cada movimiento registrado en Stellar.',
   generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
+    { media: '(prefers-color-scheme: light)', color: '#eceef8' },
+    { media: '(prefers-color-scheme: dark)', color: '#12132a' },
   ],
 }
 
@@ -39,9 +31,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="es" suppressHydrationWarning className={`${inter.variable} ${geistMono.variable}`}>
       <body className="antialiased">
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+          <TooltipProvider>
+            <AppProvider>{children}</AppProvider>
+          </TooltipProvider>
+          <Toaster position="bottom-right" richColors />
+        </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
