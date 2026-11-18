@@ -65,7 +65,9 @@ export function FichaView({ id }: { id: string }) {
                 <Bandera pais={emb.pais} conNombre />
                 <span className="inline-flex items-center gap-1.5">
                   <Cake className="size-4" aria-hidden />
-                  {emb.cumpleDia} de {nombreMes(emb.cumpleMes).toLowerCase()}
+                  {emb.cumpleDia && emb.cumpleMes
+                    ? `${emb.cumpleDia} de ${nombreMes(emb.cumpleMes).toLowerCase()}`
+                    : "Cumpleaños sin registrar"}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <CalendarDays className="size-4" aria-hidden />

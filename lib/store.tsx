@@ -17,6 +17,7 @@ import { repositorio } from "@/lib/data/repositorio"
 import { puede, type Permiso } from "@/lib/data/calculos"
 import { registrarMovimientoEnStellar, registrarPagoPremioEnStellar } from "@/lib/stellar"
 import { generarId, hoyISO } from "@/lib/format"
+import { toast } from "sonner"
 
 export interface NuevoMovimiento {
   embajadorIds: string[]
@@ -31,6 +32,7 @@ type Acciones = ReturnType<typeof useAcciones>
 interface ContextoApp {
   estado: EstadoApp | null
   acciones: Acciones
+  errorCarga: string | null
 }
 
 const Contexto = createContext<ContextoApp | null>(null)
@@ -285,15 +287,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   estadoRef.current = estado
   const acciones = useAcciones(setEstado, estadoRef)
 
+  const [errorCarga, setErrorCarga] = useState<string | null>(null)
+  const persistidoRef = useRef<EstadoApp | null>(null)
+  const colaGuardado = useRef<Promise<void>>(Promise.resolve())
+
   useEffect(() => {
     let activo = true
-    repositorio.cargarEstadoInicial().then((datos) => {
-      if (activo) setEstado(datos)
-    })
+    repositorio
+      .cargarEstadoInicial()
+      .then((datos) => {
+        if (!activo) return
+        persistidoRef.current = datos
+        setEstado(datos)
+      })
+      .catch((err: unknown) => {
+        if (activo) setErrorCarga(err instanceof Error ? err.message : "No se pudo conectar con la base de datos")
+      })
     return () => {
       activo = false
     }
   }, [])
+
+  useEffect(() => {
+    const anterior = persistidoRef.current
+    if (!estado || !anterior || anterior === estado) return
+    persistidoRef.current = estado
+    colaGuardado.current = colaGuardado.current
+      .then(() => repositorio.guardar(anterior, estado))
+      .catch((err: unknown) => {
+        console.error("[upteam] Error al guardar en la base de datos:", err)
+        toast.error("No se pudieron guardar los últimos cambios. Recarga la página para ver el estado real.")
+      })
+  }, [estado])
 
   const color = estado?.comunidad.colorPrimario
   const nombreApp = estado?.comunidad.nombreApp
@@ -306,7 +331,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (nombreApp) document.title = `${nombreApp} · Programa de embajadores`
   }, [nombreApp])
 
-  const valor = useMemo(() => ({ estado, acciones }), [estado, acciones])
+  const valor = useMemo(() => ({ estado, acciones, errorCarga }), [estado, acciones, errorCarga])
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
 

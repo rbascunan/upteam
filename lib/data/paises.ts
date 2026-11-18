@@ -8,6 +8,7 @@ export const PAISES: Record<CodigoPais, { nombre: string; iso: string }> = {
   AR: { nombre: "Argentina", iso: "ar" },
   PE: { nombre: "Perú", iso: "pe" },
   EC: { nombre: "Ecuador", iso: "ec" },
+  XX: { nombre: "Sin país", iso: "" },
 }
 
 export const CODIGOS_PAIS = Object.keys(PAISES) as CodigoPais[]

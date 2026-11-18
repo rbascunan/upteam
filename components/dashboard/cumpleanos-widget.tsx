@@ -15,9 +15,9 @@ export function CumpleanosWidget() {
   const dia = hoy.getDate()
 
   const lista = embajadores
-    .filter((e) => e.estado === "activo" && e.cumpleMes === mes)
-    .sort((a, b) => a.cumpleDia - b.cumpleDia)
-    .map((e) => ({ e, faltan: e.cumpleDia - dia }))
+    .filter((e) => e.estado === "activo" && e.cumpleMes === mes && e.cumpleDia !== null)
+    .sort((a, b) => (a.cumpleDia ?? 0) - (b.cumpleDia ?? 0))
+    .map((e) => ({ e, faltan: (e.cumpleDia ?? 0) - dia }))
 
   return (
     <Panel className="flex flex-col">

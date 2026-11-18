@@ -1,4 +1,4 @@
-export type CodigoPais = "MX" | "CO" | "CR" | "BO" | "AR" | "PE" | "EC"
+export type CodigoPais = "MX" | "CO" | "CR" | "BO" | "AR" | "PE" | "EC" | "XX"
 
 export type EstadoBlockchain = "pendiente" | "confirmado" | "error"
 export type EstadoEmbajador = "activo" | "inactivo"
@@ -19,8 +19,8 @@ export interface Embajador {
   id: string
   nombre: string
   pais: CodigoPais
-  cumpleDia: number
-  cumpleMes: number
+  cumpleDia: number | null
+  cumpleMes: number | null
   telegram: string | null
   wallet: string | null
   fechaIngreso: string
@@ -85,7 +85,7 @@ export interface EntradaBitacora {
   fecha: string
   adminId: string
   accion: string
-  entidad: "embajador" | "movimiento" | "actividad" | "nivel" | "premio" | "admin" | "comunidad"
+  entidad: "embajador" | "movimiento" | "actividad" | "nivel" | "premio" | "admin" | "comunidad" | "sistema"
   detalle: string
 }
 
