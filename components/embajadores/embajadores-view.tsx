@@ -23,6 +23,8 @@ import { formatearFecha, formatearNumero, normalizarTexto } from "@/lib/format"
 import { abreviarHash } from "@/lib/stellar"
 import { descargarCSV } from "@/lib/exportar"
 
+const FILAS_POR_TANDA = 50
+
 export function EmbajadoresView() {
   const { embajadores, movimientos, niveles, acciones, permitido } = useDatos()
   const [q, setQ] = useState("")
@@ -33,13 +35,18 @@ export function EmbajadoresView() {
   const [sumarAbierto, setSumarAbierto] = useState(false)
   const [bajaAbierta, setBajaAbierta] = useState(false)
 
-  const hoy = new Date()
-  const filas = useMemo(() => {
+  const [visibles, setVisibles] = useState(FILAS_POR_TANDA)
+
+  const base = useMemo(() => {
+    const hoy = new Date()
     const totales = puntosPorEmbajador(movimientos)
     const mes = puntosPorEmbajador(movimientos, { tipo: "mes", anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 })
+    return embajadores.map((e) => ({ e, total: totales.get(e.id) ?? 0, mes: mes.get(e.id) ?? 0, nivel: nivelDe(e, niveles) }))
+  }, [embajadores, movimientos, niveles])
+
+  const filas = useMemo(() => {
     const t = normalizarTexto(q)
-    return embajadores
-      .map((e) => ({ e, total: totales.get(e.id) ?? 0, mes: mes.get(e.id) ?? 0, nivel: nivelDe(e, niveles) }))
+    return base
       .filter(
         (f) =>
           (!t || normalizarTexto(f.e.nombre).includes(t) || normalizarTexto(f.e.telegram ?? "").includes(t.replace("@", ""))) &&
@@ -48,9 +55,16 @@ export function EmbajadoresView() {
           (estado === "todos" || f.e.estado === estado),
       )
       .sort((a, b) => b.total - a.total)
-  }, [embajadores, movimientos, niveles, q, pais, nivel, estado, hoy])
+  }, [base, q, pais, nivel, estado])
 
-  const todosMarcados = filas.length > 0 && filas.every((f) => seleccion.includes(f.e.id))
+  const [filtrosPrevios, setFiltrosPrevios] = useState(filas)
+  if (filtrosPrevios !== filas) {
+    setFiltrosPrevios(filas)
+    setVisibles(FILAS_POR_TANDA)
+  }
+
+  const marcados = useMemo(() => new Set(seleccion), [seleccion])
+  const todosMarcados = filas.length > 0 && filas.every((f) => marcados.has(f.e.id))
   const seleccionActiva = seleccion.filter((id) => embajadores.find((e) => e.id === id)?.estado === "activo")
 
   const exportar = () => {
@@ -191,12 +205,12 @@ export function EmbajadoresView() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filas.map((f) => (
-                <TableRow key={f.e.id} data-state={seleccion.includes(f.e.id) ? "selected" : undefined}>
+              {filas.slice(0, visibles).map((f) => (
+                <TableRow key={f.e.id} data-state={marcados.has(f.e.id) ? "selected" : undefined}>
                   <TableCell className="pl-4">
                     <Checkbox
                       aria-label={`Seleccionar a ${f.e.nombre}`}
-                      checked={seleccion.includes(f.e.id)}
+                      checked={marcados.has(f.e.id)}
                       onCheckedChange={(v) => setSeleccion((s) => (v ? [...s, f.e.id] : s.filter((x) => x !== f.e.id)))}
                     />
                   </TableCell>
@@ -232,6 +246,16 @@ export function EmbajadoresView() {
               ))}
             </TableBody>
           </Table>
+        )}
+        {filas.length > visibles && (
+          <div className="flex items-center justify-between gap-3 border-t p-4 text-sm text-muted-foreground">
+            <span>
+              Mostrando {formatearNumero(visibles)} de {formatearNumero(filas.length)}
+            </span>
+            <Button variant="outline" size="sm" className="rounded-lg" onClick={() => setVisibles((v) => v + FILAS_POR_TANDA)}>
+              Mostrar más
+            </Button>
+          </div>
         )}
       </Panel>
 
