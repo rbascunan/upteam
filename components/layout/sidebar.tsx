@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { Gift, History, ImagePlus, LayoutDashboard, Layers, ShieldCheck, Target, Users, Wallet, type LucideIcon } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { STELLAR_RED } from "@/lib/stellar"
@@ -18,7 +19,23 @@ export const NAVEGACION: { href: string; label: string; icon: LucideIcon }[] = [
   { href: "/administracion", label: "Administración", icon: ShieldCheck },
 ]
 
+function usePrecargarRutas() {
+  const router = useRouter()
+  useEffect(() => {
+    const precargar = () => {
+      for (const { href } of NAVEGACION) {
+        router.prefetch(href)
+        // The dev server compiles routes on first request and skips prefetching, so warm them explicitly.
+        if (process.env.NODE_ENV === "development") fetch(href, { priority: "low" }).catch(() => {})
+      }
+    }
+    const id = window.setTimeout(precargar, 300)
+    return () => window.clearTimeout(id)
+  }, [router])
+}
+
 export function SidebarContenido({ onNavegar }: { onNavegar?: () => void }) {
+  usePrecargarRutas()
   const pathname = usePathname()
   const { estado } = useApp()
   const comunidad = estado?.comunidad
@@ -83,7 +100,7 @@ export function SidebarContenido({ onNavegar }: { onNavegar?: () => void }) {
         </span>
         <div className="min-w-0 text-xs">
           <p className="font-medium">{STELLAR_RED}</p>
-          <p className="text-muted-foreground">Operativa · simulada</p>
+          <p className="text-muted-foreground">Operativa · en vivo</p>
         </div>
       </div>
     </div>

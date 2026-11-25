@@ -90,10 +90,10 @@ const PESOS_ACTIVIDAD: [string, number][] = [
 ]
 
 const NIVELES: Nivel[] = [
-  { id: "niv-explorador", nombre: "Explorador", puntosMinimos: 0, color: "#4FB3C9", icono: "compass", beneficios: ["Acceso al grupo de embajadores", "Kit de bienvenida digital"], orden: 1 },
-  { id: "niv-colaborador", nombre: "Colaborador", puntosMinimos: 300, color: "#7B5CF5", icono: "handshake", beneficios: ["Insignia de colaborador", "Acceso a talleres exclusivos"], orden: 2 },
-  { id: "niv-creador", nombre: "Creador", puntosMinimos: 800, color: "#F8A73A", icono: "sparkles", beneficios: ["Merch oficial", "Mentorías 1:1", "Prioridad en hackathons"], orden: 3 },
-  { id: "niv-lider", nombre: "Líder del ecosistema", puntosMinimos: 1500, color: "#FF4F7B", icono: "crown", beneficios: ["Viaje a evento internacional", "Voz en el comité de la comunidad", "Bono trimestral en XLM"], orden: 4 },
+  { id: "niv-explorador", nombre: "Explorador", puntosMinimos: 0, color: "#4FB3C9", icono: "compass", beneficios: ["Acceso al grupo de embajadores", "Kit de bienvenida digital"], requisitos: [], orden: 1 },
+  { id: "niv-colaborador", nombre: "Colaborador", puntosMinimos: 300, color: "#7B5CF5", icono: "handshake", beneficios: ["Insignia de colaborador", "Acceso a talleres exclusivos"], requisitos: [], orden: 2 },
+  { id: "niv-creador", nombre: "Creador", puntosMinimos: 800, color: "#F8A73A", icono: "sparkles", beneficios: ["Merch oficial", "Mentorías 1:1", "Prioridad en hackathons"], requisitos: [], orden: 3 },
+  { id: "niv-lider", nombre: "Líder del ecosistema", puntosMinimos: 1500, color: "#FF4F7B", icono: "crown", beneficios: ["Viaje a evento internacional", "Voz en el comité de la comunidad", "Bono trimestral en XLM"], requisitos: [], orden: 4 },
 ]
 
 const ADMINS: Admin[] = [
@@ -207,6 +207,8 @@ export function generarDatosEjemplo(hoy: Date = new Date()): EstadoApp {
       id: `pre-${String(i + 1).padStart(3, "0")}`,
       embajadorId: embajadores[(i * 7 + 3) % embajadores.length].id,
       concepto,
+      tipo: "dinero",
+      descripcion: "",
       monto,
       moneda,
       estado,

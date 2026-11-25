@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ArrowLeft, ArrowUpRight, Cake, CalendarDays, Gift, History, Pencil, Send, Sparkles, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Panel, PanelHeader, AvatarIniciales, BarraProgreso, BotonCopiar, Chip, EstadoVacio } from "@/components/shared/ui-bits"
+import { Panel, PanelHeader, AvatarIniciales, BotonCopiar, Chip, EstadoVacio } from "@/components/shared/ui-bits"
 import { Bandera } from "@/components/shared/bandera"
 import { IconoNivelBox } from "@/components/shared/nivel-badge"
 import { StellarChip } from "@/components/shared/stellar-chip"
@@ -13,7 +13,7 @@ import { SumarPuntosDialog } from "@/components/embajadores/sumar-puntos-dialog"
 import { EmbajadorFormDialog } from "@/components/embajadores/embajador-form-dialog"
 import { RevertirDialog } from "@/components/registro/revertir-dialog"
 import { useDatos } from "@/lib/store"
-import { nivelesOrdenados, progresoNivel, puntosPorEmbajador } from "@/lib/data/calculos"
+import { nivelesOrdenados, siguienteNivel, puntosPorEmbajador } from "@/lib/data/calculos"
 import { SimpleSelect } from "@/components/shared/simple-select"
 import { toast } from "sonner"
 import { formatearFecha, formatearNumero, nombreMes } from "@/lib/format"
@@ -43,7 +43,7 @@ export function FichaView({ id }: { id: string }) {
   const hoy = new Date()
   const delMes = puntosPorEmbajador(movimientos, { tipo: "mes", anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 }).get(emb.id) ?? 0
   const delAnio = puntosPorEmbajador(movimientos, { tipo: "anio", anio: hoy.getFullYear() }).get(emb.id) ?? 0
-  const prog = progresoNivel(total, emb, niveles)
+  const prog = siguienteNivel(emb, niveles)
   const historial = movimientos.filter((m) => m.embajadorId === emb.id)
   const susPremios = premios.filter((p) => p.embajadorId === emb.id)
 
@@ -129,10 +129,10 @@ export function FichaView({ id }: { id: string }) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">{prog.actual?.nombre ?? "Sin nivel"}</p>
                 <p className="text-xs text-muted-foreground">
-                  {prog.siguiente ? `Faltan ${formatearNumero(prog.faltan)} puntos para ${prog.siguiente.nombre}` : "Nivel máximo alcanzado"}
+                  {prog.siguiente ? `Siguiente nivel: ${prog.siguiente.nombre} (se asigna manualmente al cumplir sus requisitos)` : "Nivel máximo alcanzado"}
                 </p>
               </div>
-              {permitido("gestionar_embajadores") ? (
+              {permitido("gestionar_embajadores") && (
                 <SimpleSelect
                   value={prog.actual?.id ?? ""}
                   onChange={(nivelId) => {
@@ -143,11 +143,18 @@ export function FichaView({ id }: { id: string }) {
                   ariaLabel="Cambiar nivel del embajador"
                   className="w-48"
                 />
-              ) : (
-                <span className="text-sm font-bold tabular-nums">{prog.porcentaje}%</span>
               )}
             </div>
-            <BarraProgreso valor={prog.porcentaje} color={prog.siguiente?.color ?? prog.actual?.color} className="mt-3" etiqueta="Progreso al siguiente nivel" />
+            {prog.siguiente && prog.siguiente.requisitos.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-medium text-muted-foreground">Requisitos para {prog.siguiente.nombre}</p>
+                <ul className="mt-1.5 list-disc pl-5 text-sm">
+                  {prog.siguiente.requisitos.map((r) => (
+                    <li key={r}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             {prog.actual && prog.actual.beneficios.length > 0 && (
               <ul className="mt-3 flex flex-wrap gap-1.5">
                 {prog.actual.beneficios.map((b) => (

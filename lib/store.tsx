@@ -284,6 +284,17 @@ function useAcciones(
         return r
       },
 
+      entregarPremio: (id: string) =>
+        actualizar((e) => {
+          const p = e.premios.find((x) => x.id === id)
+          return conBitacora(
+            { ...e, premios: e.premios.map((x) => (x.id === id ? { ...x, estado: "pagado" } : x)) },
+            "Entregó premio",
+            "premio",
+            p ? `${nombreEmb(e, p.embajadorId)} · ${p.concepto}` : id,
+          )
+        }),
+
       eliminarPremio: (id: string) =>
         actualizar((e) => conBitacora({ ...e, premios: e.premios.filter((p) => p.id !== id) }, "Eliminó premio", "premio", id)),
 

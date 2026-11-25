@@ -310,6 +310,80 @@ function Bitacora() {
   )
 }
 
+const LOGO_MAX_PX = 256
+
+function redimensionarImagen(archivo: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(archivo)
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      const escala = Math.min(1, LOGO_MAX_PX / Math.max(img.width, img.height))
+      const canvas = document.createElement("canvas")
+      canvas.width = Math.round(img.width * escala)
+      canvas.height = Math.round(img.height * escala)
+      canvas.getContext("2d")?.drawImage(img, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(url)
+      resolve(canvas.toDataURL("image/png"))
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error("No se pudo leer la imagen"))
+    }
+    img.src = url
+  })
+}
+
+function LogoComunidad({ editable }: { editable: boolean }) {
+  const { comunidad, acciones } = useDatos()
+  const [subiendo, setSubiendo] = useState(false)
+
+  const subir = async (archivo: File | undefined) => {
+    if (!archivo) return
+    if (!archivo.type.startsWith("image/")) return toast.error("El archivo debe ser una imagen")
+    if (archivo.size > 5 * 1024 * 1024) return toast.error("La imagen supera 5 MB")
+    setSubiendo(true)
+    try {
+      acciones.actualizarComunidad({ logo: await redimensionarImagen(archivo) })
+      toast.success("Logo actualizado")
+    } catch {
+      toast.error("No se pudo procesar la imagen")
+    } finally {
+      setSubiendo(false)
+    }
+  }
+
+  return (
+    <div className="mb-5 flex items-center gap-4 rounded-2xl bg-muted/50 p-4">
+      {comunidad.logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={comunidad.logo} alt={`Logo de ${comunidad.nombre}`} className="size-16 shrink-0 rounded-2xl bg-card object-contain p-1" />
+      ) : (
+        <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl border-2 border-dashed border-primary/30 text-xs text-muted-foreground">
+          Sin logo
+        </span>
+      )}
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <p className="text-sm font-medium">Logo de la comunidad</p>
+        <p className="text-xs text-muted-foreground">PNG, JPG o SVG. Se muestra en el menú lateral y en los reportes PDF.</p>
+      </div>
+      {editable && (
+        <div className="flex shrink-0 gap-2">
+          <Button variant="outline" size="sm" disabled={subiendo} render={<label />} nativeButton={false}>
+            {subiendo ? "Subiendo…" : comunidad.logo ? "Cambiar" : "Subir logo"}
+            <input type="file" accept="image/*" className="sr-only" onChange={(e) => subir(e.target.files?.[0])} />
+          </Button>
+          {comunidad.logo && (
+            <Button variant="ghost" size="sm" onClick={() => acciones.actualizarComunidad({ logo: null })}>
+              Quitar
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Configuracion() {
   const { comunidad, acciones, permitido } = useDatos()
   const [f, setF] = useState({ nombre: comunidad.nombre, nombreApp: comunidad.nombreApp })
@@ -319,6 +393,7 @@ function Configuracion() {
   return (
     <Panel className="max-w-2xl">
       <PanelHeader titulo="Configuración de la comunidad" descripcion="Personaliza cómo se muestra el programa." />
+      <LogoComunidad editable={editable} />
       <form
         className="flex flex-col gap-4"
         onSubmit={(e) => {

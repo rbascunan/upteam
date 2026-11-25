@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EncabezadoPagina, Panel, Chip, EstadoVacio } from "@/components/shared/ui-bits"
 import { ConfirmarDialog } from "@/components/shared/confirmar-dialog"
 import { useDatos } from "@/lib/store"
@@ -47,64 +48,72 @@ export function ReglasView() {
           <EstadoVacio icon={Target} titulo="Aún no hay actividades" descripcion="Crea la primera regla para empezar a sumar puntos." />
         </Panel>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {actividades.map((a) => {
-            const u = usos(a.id)
-            const total = u.reduce((s, m) => s + m.puntos, 0)
-            return (
-              <Panel key={a.id} className={cn("flex flex-col gap-4", !a.activa && "opacity-70")}>
-                <div className="flex items-start gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-semibold text-pretty">{a.nombre}</h2>
-                    <p className="mt-1 text-sm text-muted-foreground text-pretty">{a.descripcion || "Sin descripción"}</p>
-                  </div>
-                  {editable && (
-                    <Switch
-                      checked={a.activa}
-                      aria-label={a.activa ? `Desactivar ${a.nombre}` : `Activar ${a.nombre}`}
-                      onCheckedChange={(v) => {
-                        acciones.guardarActividad({ ...a, activa: v })
-                        toast.success(v ? "Actividad activada" : "Actividad desactivada")
-                      }}
-                    />
-                  )}
-                </div>
-
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-4xl font-bold tracking-tight tabular-nums text-primary">{a.puntosDefecto}</p>
-                    <p className="text-xs text-muted-foreground">puntos por defecto</p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    {a.puntosVariables ? <Chip tono="orange">Variable</Chip> : <Chip tono="primary">Fijo</Chip>}
-                    {!a.activa && <Chip>Inactiva</Chip>}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-dashed pt-3 text-xs text-muted-foreground">
-                  <span>
-                    {u.length} usos · {formatearNumero(total)} pts emitidos
-                  </span>
-                  {editable && (
-                    <div className="flex gap-1">
-                      <ActividadDialog
-                        actividad={a}
-                        trigger={
-                          <Button variant="ghost" size="icon-sm" aria-label={`Editar ${a.nombre}`}>
-                            <Pencil className="size-4" aria-hidden />
+        <Panel className="p-0 sm:p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="pl-4">Actividad</TableHead>
+                <TableHead className="text-right">Puntos</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Usos</TableHead>
+                <TableHead className="text-right">Pts emitidos</TableHead>
+                <TableHead>Activa</TableHead>
+                {editable && <TableHead className="pr-4 text-right">Acciones</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {actividades.map((a) => {
+                const u = usos(a.id)
+                const total = u.reduce((s, m) => s + m.puntos, 0)
+                return (
+                  <TableRow key={a.id} className={cn(!a.activa && "opacity-60")}>
+                    <TableCell className="max-w-md pl-4 whitespace-normal">
+                      <p className="font-medium">{a.nombre}</p>
+                      <p className="text-xs text-muted-foreground text-pretty">{a.descripcion || "Sin descripción"}</p>
+                    </TableCell>
+                    <TableCell className="text-right text-lg font-bold tabular-nums text-primary">{a.puntosDefecto}</TableCell>
+                    <TableCell>{a.puntosVariables ? <Chip tono="orange">Variable</Chip> : <Chip tono="primary">Fijo</Chip>}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{formatearNumero(u.length)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{formatearNumero(total)}</TableCell>
+                    <TableCell>
+                      {editable ? (
+                        <Switch
+                          checked={a.activa}
+                          aria-label={a.activa ? `Desactivar ${a.nombre}` : `Activar ${a.nombre}`}
+                          onCheckedChange={(v) => {
+                            acciones.guardarActividad({ ...a, activa: v })
+                            toast.success(v ? "Actividad activada" : "Actividad desactivada")
+                          }}
+                        />
+                      ) : a.activa ? (
+                        "Sí"
+                      ) : (
+                        "No"
+                      )}
+                    </TableCell>
+                    {editable && (
+                      <TableCell className="pr-4 text-right">
+                        <div className="flex justify-end gap-1">
+                          <ActividadDialog
+                            actividad={a}
+                            trigger={
+                              <Button variant="ghost" size="icon-sm" aria-label={`Editar ${a.nombre}`}>
+                                <Pencil className="size-4" aria-hidden />
+                              </Button>
+                            }
+                          />
+                          <Button variant="ghost" size="icon-sm" aria-label={`Eliminar ${a.nombre}`} onClick={() => setEliminar(a)}>
+                            <Trash2 className="size-4" aria-hidden />
                           </Button>
-                        }
-                      />
-                      <Button variant="ghost" size="icon-sm" aria-label={`Eliminar ${a.nombre}`} onClick={() => setEliminar(a)}>
-                        <Trash2 className="size-4" aria-hidden />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </Panel>
-            )
-          })}
-        </div>
+                        </div>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </Panel>
       )}
 
       <ConfirmarDialog
