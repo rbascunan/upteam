@@ -31,6 +31,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Header />
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {estado ? children : <CargandoPantalla />}
+          <footer className="mt-10 border-t border-dashed pt-4 text-center text-xs text-muted-foreground">
+            Creada por el equipo de Betito Bascuñan · V. 15 · 09/2026 · Feedback al{" "}
+            <a href="https://wa.me/5492617176713" target="_blank" rel="noreferrer" className="underline-offset-2 hover:text-foreground hover:underline">
+              +5492617176713
+            </a>
+          </footer>
         </main>
       </div>
     </div>

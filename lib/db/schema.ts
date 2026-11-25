@@ -40,10 +40,11 @@ export const actividades = pgTable("actividades", {
 export const niveles = pgTable("niveles", {
   id: text("id").primaryKey(),
   nombre: text("nombre").notNull(),
-  puntosMinimos: integer("puntos_minimos").notNull(),
+  puntosMinimos: integer("puntos_minimos").notNull().default(0),
   color: text("color").notNull(),
   icono: text("icono").notNull(),
   beneficios: jsonb("beneficios").$type<string[]>().notNull(),
+  requisitos: jsonb("requisitos").$type<string[]>().notNull().default([]),
   orden: integer("orden").notNull(),
 })
 
@@ -67,6 +68,8 @@ export const premios = pgTable("premios", {
   id: text("id").primaryKey(),
   embajadorId: text("embajador_id").notNull(),
   concepto: text("concepto").notNull(),
+  tipo: text("tipo").notNull().default("dinero"),
+  descripcion: text("descripcion").notNull().default(""),
   monto: numeric("monto", { precision: 14, scale: 2, mode: "number" }).notNull(),
   moneda: text("moneda").notNull(),
   estado: text("estado").notNull(),

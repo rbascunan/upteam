@@ -100,7 +100,7 @@ export function SidebarContenido({ onNavegar }: { onNavegar?: () => void }) {
         </span>
         <div className="min-w-0 text-xs">
           <p className="font-medium">{STELLAR_RED}</p>
-          <p className="text-muted-foreground">Operativa · simulada</p>
+          <p className="text-muted-foreground">Operativa · en vivo</p>
         </div>
       </div>
     </div>

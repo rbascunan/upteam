@@ -4,7 +4,8 @@ export type EstadoBlockchain = "pendiente" | "confirmado" | "error" | "historico
 export type EstadoEmbajador = "activo" | "inactivo"
 export type EstadoPremio = "pendiente" | "aprobado" | "pagado"
 export type RolAdmin = "super_admin" | "admin"
-export type MonedaPremio = "XLM" | "USDC" | "StellarPoints"
+export type MonedaPremio = "XLM" | "USDC" | "StellarPoints" | "USD"
+export type TipoPremio = "dinero" | "beca" | "viaje" | "producto" | "experiencia" | "otro"
 export type IconoNivel = "compass" | "handshake" | "sparkles" | "crown" | "star" | "rocket" | "shield" | "gem"
 
 export interface Comunidad {
@@ -60,6 +61,7 @@ export interface Nivel {
   color: string
   icono: IconoNivel
   beneficios: string[]
+  requisitos: string[]
   orden: number
 }
 
@@ -67,6 +69,8 @@ export interface Premio {
   id: string
   embajadorId: string
   concepto: string
+  tipo: TipoPremio
+  descripcion: string
   monto: number
   moneda: MonedaPremio
   estado: EstadoPremio

@@ -15,10 +15,20 @@ import { ConfirmarDialog } from "@/components/shared/confirmar-dialog"
 import { useDatos } from "@/lib/store"
 import { formatearFecha, formatearNumero, hoyISO } from "@/lib/format"
 import { abreviarHash, urlTransaccion } from "@/lib/stellar"
-import type { EstadoPremio, MonedaPremio, Premio } from "@/lib/types"
+import type { EstadoPremio, MonedaPremio, Premio, TipoPremio } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { Textarea } from "@/components/ui/textarea"
 
 const TONO: Record<EstadoPremio, "orange" | "primary" | "success"> = { pendiente: "orange", aprobado: "primary", pagado: "success" }
+
+const TIPOS_PREMIO: Record<TipoPremio, string> = {
+  dinero: "Dinero (pago en Stellar)",
+  beca: "Beca",
+  viaje: "Viaje",
+  producto: "Producto / merch",
+  experiencia: "Experiencia / evento",
+  otro: "Otro",
+}
 
 export function PremiosView() {
   const { premios, embajadores, acciones, permitido } = useDatos()
@@ -113,9 +123,20 @@ export function PremiosView() {
                       </Link>
                       {!emb?.wallet && <span className="block text-xs text-[color-mix(in_oklab,var(--brand-orange)_75%,var(--foreground))]">Sin wallet</span>}
                     </TableCell>
-                    <TableCell className="text-sm">{p.concepto}</TableCell>
+                    <TableCell className="text-sm">
+                      {p.concepto}
+                      {p.tipo !== "dinero" && <span className="block text-xs text-muted-foreground">{TIPOS_PREMIO[p.tipo]}{p.descripcion ? ` · ${p.descripcion}` : ""}</span>}
+                    </TableCell>
                     <TableCell className="text-right font-semibold tabular-nums">
-                      {formatearNumero(p.monto, 2)} <span className="text-xs text-muted-foreground">{p.moneda}</span>
+                      {p.tipo === "dinero" ? (
+                        <>
+                          {formatearNumero(p.monto, 2)} <span className="text-xs text-muted-foreground">{p.moneda}</span>
+                        </>
+                      ) : p.monto > 0 ? (
+                        <span className="text-muted-foreground">~{formatearNumero(p.monto, 0)} USD</span>
+                      ) : (
+                        "—"
+                      )}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{formatearFecha(p.fecha)}</TableCell>
                     <TableCell>
@@ -143,9 +164,20 @@ export function PremiosView() {
                             Aprobar
                           </Button>
                         )}
-                        {editable && p.estado === "aprobado" && (
+                        {editable && p.estado === "aprobado" && p.tipo === "dinero" && (
                           <Button size="sm" disabled={pagando === p.id || !emb?.wallet} onClick={() => pagar(p)}>
                             {pagando === p.id ? "Enviando…" : "Pagar"}
+                          </Button>
+                        )}
+                        {editable && p.estado === "aprobado" && p.tipo !== "dinero" && (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              acciones.entregarPremio(p.id)
+                              toast.success("Premio marcado como entregado")
+                            }}
+                          >
+                            Marcar entregado
                           </Button>
                         )}
                         {editable && p.estado !== "pagado" && (
@@ -184,10 +216,11 @@ function PremioDialog({ trigger }: { trigger: React.ReactElement }) {
   const { embajadores, acciones } = useDatos()
   const activos = embajadores.filter((e) => e.estado === "activo")
   const [open, setOpen] = useState(false)
-  const inicial = () => ({ embajadorId: activos[0]?.id ?? "", concepto: "", monto: "10", moneda: "XLM" as MonedaPremio })
+  const inicial = () => ({ embajadorId: activos[0]?.id ?? "", tipo: "dinero" as TipoPremio, concepto: "", descripcion: "", monto: "10", moneda: "XLM" as MonedaPremio })
   const [f, setF] = useState(inicial)
+  const esDinero = f.tipo === "dinero"
   const monto = Number(f.monto)
-  const valido = f.embajadorId && f.concepto.trim().length >= 3 && monto > 0
+  const valido = f.embajadorId && f.concepto.trim().length >= 3 && (esDinero ? monto > 0 : monto >= 0)
 
   return (
     <Dialog
@@ -204,7 +237,15 @@ function PremioDialog({ trigger }: { trigger: React.ReactElement }) {
           onSubmit={(e) => {
             e.preventDefault()
             if (!valido) return
-            acciones.crearPremio({ embajadorId: f.embajadorId, concepto: f.concepto.trim(), monto, moneda: f.moneda, fecha: hoyISO() })
+            acciones.crearPremio({
+              embajadorId: f.embajadorId,
+              tipo: f.tipo,
+              concepto: f.concepto.trim(),
+              descripcion: f.descripcion.trim(),
+              monto: esDinero ? monto : monto || 0,
+              moneda: esDinero ? f.moneda : "USDC",
+              fecha: hoyISO(),
+            })
             toast.success("Premio creado, pendiente de aprobación")
             setOpen(false)
           }}
@@ -218,23 +259,55 @@ function PremioDialog({ trigger }: { trigger: React.ReactElement }) {
             <SimpleSelect id="pr-emb" value={f.embajadorId} onChange={(v) => setF({ ...f, embajadorId: v })} opciones={activos.map((e) => ({ value: e.id, label: e.nombre }))} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="pr-concepto">Concepto</Label>
-            <Input id="pr-concepto" value={f.concepto} onChange={(e) => setF({ ...f, concepto: e.target.value })} placeholder="Ej.: Embajador del mes" className="rounded-xl" />
+            <Label htmlFor="pr-tipo">Tipo de premio</Label>
+            <SimpleSelect
+              id="pr-tipo"
+              value={f.tipo}
+              onChange={(v) => setF({ ...f, tipo: v as TipoPremio, monto: v === "dinero" ? f.monto || "10" : "0" })}
+              opciones={(Object.keys(TIPOS_PREMIO) as TipoPremio[]).map((t) => ({ value: t, label: TIPOS_PREMIO[t] }))}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="pr-concepto">Concepto</Label>
+            <Input
+              id="pr-concepto"
+              value={f.concepto}
+              onChange={(e) => setF({ ...f, concepto: e.target.value })}
+              placeholder={esDinero ? "Ej.: Embajador del mes" : "Ej.: Beca para viajar a Meridian 2027"}
+              className="rounded-xl"
+            />
+          </div>
+          {!esDinero && (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pr-monto">Monto</Label>
-              <Input id="pr-monto" type="number" min={0.01} step={0.01} value={f.monto} onChange={(e) => setF({ ...f, monto: e.target.value })} className="rounded-xl" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="pr-moneda">Moneda</Label>
-              <SimpleSelect
-                id="pr-moneda"
-                value={f.moneda}
-                onChange={(v) => setF({ ...f, moneda: v as MonedaPremio })}
-                opciones={(["XLM", "USDC", "StellarPoints"] as const).map((m) => ({ value: m, label: m }))}
+              <Label htmlFor="pr-desc">Detalle (opcional)</Label>
+              <Textarea
+                id="pr-desc"
+                rows={2}
+                value={f.descripcion}
+                onChange={(e) => setF({ ...f, descripcion: e.target.value })}
+                placeholder="Ej.: Incluye pasaje y hospedaje 3 noches"
+                className="rounded-xl"
               />
             </div>
+          )}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="pr-monto">{esDinero ? "Monto" : "Valor estimado (opcional)"}</Label>
+              <Input id="pr-monto" type="number" min={esDinero ? 0.01 : 0} step={0.01} value={f.monto} onChange={(e) => setF({ ...f, monto: e.target.value })} className="rounded-xl" />
+            </div>
+            {esDinero ? (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="pr-moneda">Moneda</Label>
+                <SimpleSelect
+                  id="pr-moneda"
+                  value={f.moneda}
+                  onChange={(v) => setF({ ...f, moneda: v as MonedaPremio })}
+                  opciones={(["XLM", "USDC", "StellarPoints"] as const).map((m) => ({ value: m, label: m }))}
+                />
+              </div>
+            ) : (
+              <p className="self-end pb-2 text-xs text-muted-foreground">En USD. Se marca como entregado, sin pago en Stellar.</p>
+            )}
           </div>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>

@@ -1,6 +1,6 @@
 "use server"
 
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { BASE_FEE, Horizon, Keypair, Memo, Networks, Operation, TransactionBuilder } from "@stellar/stellar-sdk"
 import { db } from "@/lib/db"
 import * as t from "@/lib/db/schema"
@@ -17,10 +17,15 @@ async function obtenerKeypair(): Promise<Keypair> {
   const secreto = process.env.STELLAR_SECRET_KEY
   if (!secreto) throw new Error("Falta la variable de entorno STELLAR_SECRET_KEY")
   const kp = Keypair.fromSecret(secreto)
-  await db
-    .insert(t.configStellar)
-    .values({ id: "registro", clavePublica: kp.publicKey() })
-    .onConflictDoUpdate({ target: t.configStellar.id, set: { clavePublica: kp.publicKey() } })
+  try {
+    await db
+      .insert(t.configStellar)
+      .values({ id: "registro", clavePublica: kp.publicKey() })
+      .onConflictDoUpdate({ target: t.configStellar.id, set: { clavePublica: kp.publicKey() } })
+  } catch (e) {
+    // Only informational: a failure here must never block registering movements on-chain.
+    console.error("No se pudo guardar la clave pública de Stellar", e)
+  }
   keypairCache = kp
   return kp
 }
@@ -37,18 +42,25 @@ function describirError(e: unknown): string {
   return e instanceof Error ? e.message : "Error desconocido al enviar a Stellar"
 }
 
-/** Registra un evento en Stellar Testnet sin mover fondos: memo + manageData en la cuenta de la comunidad. */
-async function registrarEvento(memo: string, clave: string, valor: string): Promise<ResultadoStellar> {
-  const kp = await obtenerKeypair()
+/**
+ * Registra eventos en Stellar Testnet sin mover fondos: una transacción con memo y una operación
+ * manageData por evento (máx. 100 por transacción), así una carga masiva se confirma de una vez.
+ */
+async function registrarEvento(memo: string, clave: string, valor: string | string[]): Promise<ResultadoStellar> {
+  let kp: Keypair
+  try {
+    kp = await obtenerKeypair()
+  } catch (e) {
+    return { ok: false, error: describirError(e) }
+  }
+  const valores = (Array.isArray(valor) ? valor : [valor]).slice(0, 100)
   let ultimoError = ""
   for (let intento = 0; intento < 3; intento++) {
     try {
       const cuenta = await horizon.loadAccount(kp.publicKey())
-      const tx = new TransactionBuilder(cuenta, { fee: BASE_FEE, networkPassphrase: Networks.TESTNET })
-        .addOperation(Operation.manageData({ name: recortarBytes(clave, 64), value: recortarBytes(valor, 64) }))
-        .addMemo(Memo.text(recortarBytes(memo, 28)))
-        .setTimeout(60)
-        .build()
+      const builder = new TransactionBuilder(cuenta, { fee: String(Number(BASE_FEE) * 10), networkPassphrase: Networks.TESTNET })
+      for (const v of valores) builder.addOperation(Operation.manageData({ name: recortarBytes(clave, 64), value: recortarBytes(v, 64) }))
+      const tx = builder.addMemo(Memo.text(recortarBytes(memo, 28))).setTimeout(60).build()
       tx.sign(kp)
       const res = await horizon.submitTransaction(tx)
       return { ok: true, txHash: res.hash }
@@ -85,22 +97,26 @@ export async function registrarMovimientosStellar(
     .slice(0, MAX_POR_LLAMADA)
     .filter((m) => typeof m.id === "string" && typeof m.embajadorId === "string" && Number.isInteger(m.puntos))
 
-  const salida: { id: string; resultado: ResultadoStellar }[] = []
-  for (const m of validos) {
-    const signo = m.puntos > 0 ? "+" : ""
-    const resultado = await registrarEvento(`${signo}${m.puntos} StellarPoints`, "StellarPoints", `${m.id}|${m.embajadorId}|${signo}${m.puntos}`)
-    if (resultado.ok) {
-      await db.update(t.movimientos).set({ txHash: resultado.txHash, estadoBlockchain: "confirmado" }).where(eq(t.movimientos.id, m.id))
-    }
-    salida.push({ id: m.id, resultado })
+  if (!validos.length) return []
+  const conSigno = (p: number) => `${p > 0 ? "+" : ""}${p}`
+  const neto = validos.reduce((s, m) => s + m.puntos, 0)
+  const memo = validos.length === 1 ? `${conSigno(neto)} StellarPoints` : `${validos.length} mov ${conSigno(neto)} SP`
+  const resultado = await registrarEvento(memo, "StellarPoints", validos.map((m) => `${m.id}|${m.embajadorId}|${conSigno(m.puntos)}`))
+  if (resultado.ok) {
+    await db
+      .update(t.movimientos)
+      .set({ txHash: resultado.txHash, estadoBlockchain: "confirmado" })
+      .where(inArray(t.movimientos.id, validos.map((m) => m.id)))
+      .catch((e) => console.error("No se pudo marcar los movimientos como confirmados", e))
   }
   await actualizarBalance()
-  return salida
+  return validos.map((m) => ({ id: m.id, resultado }))
 }
 
-export async function registrarPremioStellar(premio: { id: string; monto: number; moneda: string }): Promise<ResultadoStellar> {
+export async function registrarPremioStellar(premio: { id: string; monto: number; moneda: string; tipo?: string }): Promise<ResultadoStellar> {
   if (typeof premio.id !== "string" || !Number.isFinite(premio.monto)) return { ok: false, error: "Premio inválido" }
-  const resultado = await registrarEvento(`Premio ${premio.monto} ${premio.moneda}`, "Premio", `${premio.id}|${premio.monto} ${premio.moneda}`)
+  const detalle = premio.tipo && premio.tipo !== "dinero" ? premio.tipo : `${premio.monto} ${premio.moneda}`
+  const resultado = await registrarEvento(`Premio ${detalle}`, "Premio", `${premio.id}|${detalle}`)
   await actualizarBalance()
   return resultado
 }

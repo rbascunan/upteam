@@ -23,7 +23,7 @@ export function puntosTotales(movimientos: Movimiento[], periodo: Periodo = { ti
 }
 
 export function nivelesOrdenados(niveles: Nivel[]) {
-  return [...niveles].sort((a, b) => a.puntosMinimos - b.puntosMinimos || a.orden - b.orden)
+  return [...niveles].sort((a, b) => a.orden - b.orden)
 }
 
 export function nivelInicial(niveles: Nivel[]): Nivel | null {
@@ -35,20 +35,12 @@ export function nivelDe(embajador: Pick<Embajador, "nivelId">, niveles: Nivel[])
   return niveles.find((n) => n.id === embajador.nivelId) ?? nivelInicial(niveles)
 }
 
-export function progresoNivel(puntos: number, embajador: Pick<Embajador, "nivelId">, niveles: Nivel[]) {
+/** Los niveles se asignan manualmente por requisitos externos; los puntos no influyen. */
+export function siguienteNivel(embajador: Pick<Embajador, "nivelId">, niveles: Nivel[]) {
   const orden = nivelesOrdenados(niveles)
   const actual = nivelDe(embajador, niveles)
   const idx = actual ? orden.findIndex((n) => n.id === actual.id) : -1
-  const siguiente = orden[idx + 1] ?? null
-  if (!actual || !siguiente) return { actual, siguiente: null, porcentaje: 100, faltan: 0 }
-  const rango = siguiente.puntosMinimos - actual.puntosMinimos
-  const avance = puntos - actual.puntosMinimos
-  return {
-    actual,
-    siguiente,
-    porcentaje: Math.min(100, Math.max(0, Math.round((avance / rango) * 100))),
-    faltan: Math.max(0, siguiente.puntosMinimos - puntos),
-  }
+  return { actual, siguiente: orden[idx + 1] ?? null }
 }
 
 export interface FilaRanking {

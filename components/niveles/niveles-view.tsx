@@ -40,7 +40,7 @@ export function NivelesView() {
     <>
       <EncabezadoPagina
         titulo="Niveles"
-        descripcion="Todos inician como Explorador. El nivel de cada embajador se cambia manualmente desde su ficha; los puntos mínimos son una referencia."
+        descripcion="Todos inician como Explorador. El nivel no depende de los puntos: se asigna manualmente desde la ficha de cada embajador cuando cumple los requisitos del nivel."
         acciones={
           editable && (
             <NivelDialog
@@ -62,7 +62,6 @@ export function NivelesView() {
       ) : (
         <ol className="flex flex-col gap-4">
           {ordenados.map((n, i) => {
-            const siguiente = ordenados[i + 1]
             return (
               <li key={n.id}>
                 <Panel className="flex flex-wrap items-center gap-4">
@@ -72,10 +71,15 @@ export function NivelesView() {
                       <h2 className="text-lg font-semibold">{n.nombre}</h2>
                       <Chip>{conteo.get(n.id) ?? 0} embajadores</Chip>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {formatearNumero(n.puntosMinimos)}
-                      {siguiente ? ` – ${formatearNumero(siguiente.puntosMinimos - 1)}` : "+"} puntos
-                    </p>
+                    {n.requisitos.length > 0 ? (
+                      <ul className="mt-1 list-disc pl-5 text-sm text-muted-foreground">
+                        {n.requisitos.map((r) => (
+                          <li key={r}>{r}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Sin requisitos definidos</p>
+                    )}
                     {n.beneficios.length > 0 && (
                       <ul className="mt-2 flex flex-wrap gap-1.5">
                         {n.beneficios.map((b) => (
@@ -136,19 +140,17 @@ export function NivelesView() {
 }
 
 function NivelDialog({ trigger, nivel }: { trigger: React.ReactElement; nivel?: Nivel }) {
-  const { niveles, acciones } = useDatos()
+  const { acciones } = useDatos()
   const [open, setOpen] = useState(false)
   const inicial = () => ({
     nombre: nivel?.nombre ?? "",
-    puntos: String(nivel?.puntosMinimos ?? 0),
     color: nivel?.color ?? COLORES[0],
     icono: (nivel?.icono ?? "star") as IconoNivel,
+    requisitos: nivel?.requisitos.join("\n") ?? "",
     beneficios: nivel?.beneficios.join("\n") ?? "",
   })
   const [f, setF] = useState(inicial)
-  const puntos = Number(f.puntos)
-  const choca = niveles.some((n) => n.id !== nivel?.id && n.puntosMinimos === puntos)
-  const valido = f.nombre.trim().length >= 2 && Number.isInteger(puntos) && puntos >= 0 && !choca
+  const valido = f.nombre.trim().length >= 2
 
   return (
     <Dialog
@@ -169,9 +171,10 @@ function NivelDialog({ trigger, nivel }: { trigger: React.ReactElement; nivel?: 
               id: nivel?.id,
               orden: nivel?.orden,
               nombre: f.nombre.trim(),
-              puntosMinimos: puntos,
+              puntosMinimos: nivel?.puntosMinimos ?? 0,
               color: f.color,
               icono: f.icono,
+              requisitos: f.requisitos.split("\n").map((r) => r.trim()).filter(Boolean),
               beneficios: f.beneficios.split("\n").map((b) => b.trim()).filter(Boolean),
             })
             toast.success(nivel ? "Nivel actualizado" : "Nivel creado")
@@ -180,7 +183,7 @@ function NivelDialog({ trigger, nivel }: { trigger: React.ReactElement; nivel?: 
         >
           <DialogHeader>
             <DialogTitle>{nivel ? "Editar nivel" : "Nuevo nivel"}</DialogTitle>
-            <DialogDescription>Elige un nombre, el umbral de puntos y su identidad visual.</DialogDescription>
+            <DialogDescription>Define el nombre, los requisitos externos para alcanzarlo y su identidad visual.</DialogDescription>
           </DialogHeader>
           <div className="flex items-center gap-3">
             <IconoNivelBox nivel={f} size="lg" />
@@ -190,9 +193,15 @@ function NivelDialog({ trigger, nivel }: { trigger: React.ReactElement; nivel?: 
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="niv-puntos">Puntos mínimos</Label>
-            <Input id="niv-puntos" type="number" min={0} value={f.puntos} onChange={(e) => setF({ ...f, puntos: e.target.value })} className="rounded-xl" aria-invalid={choca} />
-            {choca && <p className="text-xs text-destructive">Ya existe un nivel con ese umbral.</p>}
+            <Label htmlFor="niv-req">Requisitos para alcanzarlo (uno por línea)</Label>
+            <Textarea
+              id="niv-req"
+              rows={3}
+              value={f.requisitos}
+              onChange={(e) => setF({ ...f, requisitos: e.target.value })}
+              placeholder={"Ej.: Organizar 2 meetups\nCompletar curso de Soroban"}
+              className="rounded-xl"
+            />
           </div>
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-2 text-sm font-medium">Color</legend>
