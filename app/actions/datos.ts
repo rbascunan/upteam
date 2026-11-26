@@ -3,12 +3,14 @@
 import { asc, desc, getTableColumns, inArray, sql } from "drizzle-orm"
 import type { AnyPgColumn, PgTable } from "drizzle-orm/pg-core"
 import { db } from "@/lib/db"
+import { exigirUsuario } from "@/lib/session"
 import * as t from "@/lib/db/schema"
 import type { EstadoApp } from "@/lib/types"
 
 const aISOHora = (s: string) => s.replace(" ", "T").slice(0, 19)
 
 export async function cargarEstado(): Promise<EstadoApp> {
+  await exigirUsuario()
   const [comunidad, embajadores, actividades, movimientos, niveles, premios, admins, bitacora, cuentas] = await Promise.all([
     db.select().from(t.comunidad).limit(1),
     db.select().from(t.embajadores).orderBy(asc(t.embajadores.nombre)),
@@ -52,6 +54,7 @@ export type NombreTabla = keyof typeof TABLAS
 export type Cambios = Partial<Record<NombreTabla, { guardar: Record<string, unknown>[]; eliminar: string[] }>>
 
 export async function guardarCambios(cambios: Cambios) {
+  await exigirUsuario()
   await db.transaction(async (tx) => {
     for (const [nombre, cambio] of Object.entries(cambios)) {
       const tabla = TABLAS[nombre as NombreTabla]

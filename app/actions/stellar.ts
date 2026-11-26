@@ -3,6 +3,7 @@
 import { eq, inArray } from "drizzle-orm"
 import { BASE_FEE, Horizon, Keypair, Memo, Networks, Operation, TransactionBuilder } from "@stellar/stellar-sdk"
 import { db } from "@/lib/db"
+import { exigirUsuario } from "@/lib/session"
 import * as t from "@/lib/db/schema"
 import type { ResultadoStellar } from "@/lib/stellar"
 
@@ -93,6 +94,7 @@ export interface MovimientoARegistrar {
 export async function registrarMovimientosStellar(
   movimientos: MovimientoARegistrar[],
 ): Promise<{ id: string; resultado: ResultadoStellar }[]> {
+  await exigirUsuario()
   const validos = movimientos
     .slice(0, MAX_POR_LLAMADA)
     .filter((m) => typeof m.id === "string" && typeof m.embajadorId === "string" && Number.isInteger(m.puntos))
@@ -114,6 +116,7 @@ export async function registrarMovimientosStellar(
 }
 
 export async function registrarPremioStellar(premio: { id: string; monto: number; moneda: string; tipo?: string }): Promise<ResultadoStellar> {
+  await exigirUsuario()
   if (typeof premio.id !== "string" || !Number.isFinite(premio.monto)) return { ok: false, error: "Premio inválido" }
   const detalle = premio.tipo && premio.tipo !== "dinero" ? premio.tipo : `${premio.monto} ${premio.moneda}`
   const resultado = await registrarEvento(`Premio ${detalle}`, "Premio", `${premio.id}|${detalle}`)

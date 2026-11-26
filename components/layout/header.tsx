@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Check, ChevronDown, Menu, Moon, Search, Sun, Users } from "lucide-react"
+import { Check, ChevronDown, LogOut, Menu, Moon, Search, Sun, Users } from "lucide-react"
+import { signOut } from "@/lib/auth-client"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import {
   DropdownMenu,
@@ -98,8 +99,15 @@ function BuscadorGlobal() {
   )
 }
 
-export function Header() {
+export function Header({ usuario }: { usuario: { nombre: string; email: string } }) {
   const { estado, acciones } = useApp()
+  const router = useRouter()
+
+  async function cerrarSesion() {
+    await signOut()
+    router.push("/login")
+    router.refresh()
+  }
   const { resolvedTheme, setTheme } = useTheme()
   const [menuMovil, setMenuMovil] = useState(false)
   const admin = estado?.admins.find((a) => a.id === estado.adminActualId)
@@ -174,6 +182,14 @@ export function Header() {
                   </Chip>
                 </DropdownMenuItem>
               ))}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="truncate font-normal text-muted-foreground">{usuario.email}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={cerrarSesion} className="gap-2">
+                <LogOut className="size-4" aria-hidden />
+                Cerrar sesión
+              </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
