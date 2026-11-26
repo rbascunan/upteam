@@ -4,7 +4,6 @@ import { Inter, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { AppProvider } from '@/lib/store'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -35,7 +34,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <TooltipProvider>
-            <AppProvider>{children}</AppProvider>
+            {children}
           </TooltipProvider>
           <Toaster position="bottom-right" richColors />
         </ThemeProvider>

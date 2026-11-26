@@ -22,13 +22,19 @@ function CargandoPantalla() {
   )
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  usuario,
+}: {
+  children: React.ReactNode
+  usuario: { nombre: string; email: string }
+}) {
   const { estado } = useApp()
   return (
     <div className="flex min-h-dvh">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
+        <Header usuario={usuario} />
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
           {estado ? children : <CargandoPantalla />}
           <footer className="mt-10 border-t border-dashed pt-4 text-center text-xs text-muted-foreground">
