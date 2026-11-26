@@ -9,11 +9,33 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
+const urlSitio = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : 'https://v0-upteams.vercel.app'
+
+const tituloSitio = 'Upteam · Programa de embajadores'
+const descripcionSitio =
+  'Gestiona embajadores, puntos, niveles y premios de tu comunidad en un solo lugar, con cada movimiento registrado en Stellar.'
+
 export const metadata: Metadata = {
-  title: 'Upteam · Programa de embajadores',
-  description:
-    'Upteam centraliza embajadores, puntos, niveles, premios y cumpleaños de tu comunidad, con cada movimiento registrado en Stellar.',
+  metadataBase: new URL(urlSitio),
+  title: tituloSitio,
+  description: descripcionSitio,
+  applicationName: 'Upteam',
   generator: 'v0.app',
+  openGraph: {
+    type: 'website',
+    locale: 'es_CL',
+    siteName: 'Upteam',
+    title: tituloSitio,
+    description: descripcionSitio,
+    url: '/',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: tituloSitio,
+    description: descripcionSitio,
+  },
 }
 
 export const viewport: Viewport = {
