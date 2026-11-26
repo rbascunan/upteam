@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { FormularioAcceso } from "@/components/auth/formulario-acceso"
+import { PiePagina } from "@/components/layout/pie-pagina"
 import { obtenerSesion } from "@/lib/session"
 
 export const metadata: Metadata = {
@@ -13,8 +14,11 @@ export default async function LoginPage() {
   if (sesion?.user) redirect("/")
 
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4 py-10">
-      <FormularioAcceso />
-    </main>
+    <div className="flex min-h-dvh flex-col">
+      <main className="flex flex-1 items-center justify-center px-4 py-10">
+        <FormularioAcceso />
+      </main>
+      <PiePagina className="px-4 pb-6" />
+    </div>
   )
 }
