@@ -34,6 +34,7 @@ interface ContextoApp {
   estado: EstadoApp | null
   acciones: Acciones
   errorCarga: string | null
+  soloLectura?: boolean
 }
 
 const Contexto = createContext<ContextoApp | null>(null)
@@ -374,6 +375,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
 
+const sinCambios: React.Dispatch<React.SetStateAction<EstadoApp | null>> = () => {}
+
+/** Vista pública: entrega datos fijos del servidor y nunca guarda cambios. */
+export function ProveedorSoloLectura({ estado, children }: { estado: EstadoApp; children: React.ReactNode }) {
+  const estadoRef = useRef<EstadoApp | null>(estado)
+  const acciones = useAcciones(sinCambios, estadoRef)
+  const color = estado.comunidad.colorPrimario
+  useEffect(() => {
+    if (!color) return
+    const root = document.documentElement
+    for (const v of ["--primary", "--ring", "--chart-1", "--sidebar-primary"]) root.style.setProperty(v, color)
+  }, [color])
+  const valor = useMemo(() => ({ estado, acciones, errorCarga: null, soloLectura: true }), [estado, acciones])
+  return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
+}
+
 export function useApp() {
   const ctx = useContext(Contexto)
   if (!ctx) throw new Error("useApp debe usarse dentro de AppProvider")
@@ -382,9 +399,9 @@ export function useApp() {
 
 /** Para pantallas que ya se renderizan con datos cargados. */
 export function useDatos() {
-  const { estado, acciones } = useApp()
+  const { estado, acciones, soloLectura = false } = useApp()
   if (!estado) throw new Error("Datos no cargados")
   const adminActual = estado.admins.find((a) => a.id === estado.adminActualId) ?? estado.admins[0]
-  const permitido = (p: Permiso) => (adminActual ? puede(adminActual.rol, p) : false)
-  return { ...estado, acciones, adminActual, permitido }
+  const permitido = (p: Permiso) => (!soloLectura && adminActual ? puede(adminActual.rol, p) : false)
+  return { ...estado, acciones, adminActual, permitido, soloLectura }
 }
