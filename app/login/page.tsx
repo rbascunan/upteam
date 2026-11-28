@@ -3,7 +3,16 @@ import { redirect } from "next/navigation"
 import { Sparkles } from "lucide-react"
 import { Hero } from "@/components/landing/hero"
 import { SeccionComunidades, SeccionFunciones, SeccionProblema } from "@/components/landing/secciones"
+import { SeccionStellar } from "@/components/landing/seccion-stellar"
+import { TecnologiaStellar } from "@/components/landing/tecnologia-stellar"
 import { PiePagina } from "@/components/layout/pie-pagina"
+
+const menu = [
+  { href: "#problema", texto: "Problema" },
+  { href: "#funciones", texto: "Funciones" },
+  { href: "#stellar", texto: "Stellar" },
+  { href: "#comunidades", texto: "Comunidades" },
+]
 import { obtenerSesion } from "@/lib/session"
 
 export const metadata: Metadata = {
@@ -26,6 +35,17 @@ export default async function LoginPage() {
             </span>
             Upteam
           </span>
+          <nav aria-label="Secciones" className="hidden md:block">
+            <ul className="flex items-center gap-6 text-sm text-muted-foreground">
+              {menu.map((item) => (
+                <li key={item.href}>
+                  <a href={item.href} className="transition-colors hover:text-foreground">
+                    {item.texto}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
           <a
             href="#acceso"
             className="inline-flex h-9 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
@@ -38,9 +58,13 @@ export default async function LoginPage() {
         <Hero />
         <SeccionProblema />
         <SeccionFunciones />
+        <SeccionStellar />
         <SeccionComunidades />
       </main>
-      <PiePagina className="px-4 pb-6" />
+      <footer className="flex flex-col gap-4 pb-6">
+        <TecnologiaStellar />
+        <PiePagina className="px-4" />
+      </footer>
     </div>
   )
 }

@@ -57,7 +57,7 @@ export function FormularioAcceso() {
   }
 
   return (
-    <div className="neu w-full max-w-md rounded-3xl p-8">
+    <div className="neu w-full max-w-md rounded-3xl p-8 dark:border dark:border-primary/40 dark:bg-secondary">
       <div className="mb-6 flex flex-col items-center gap-3 text-center">
         <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
           <Sparkles className="size-6" aria-hidden />
@@ -67,7 +67,7 @@ export function FormularioAcceso() {
         </h2>
         <p className="text-sm text-muted-foreground text-pretty">
           {modo === "ingresar"
-            ? "Ingresa para administrar el programa de embajadores de tu comunidad."
+            ? "Ingresa para administrar el programa de integrantes de tu comunidad."
             : "Regístrate con tu email y una contraseña de al menos 8 caracteres."}
         </p>
       </div>

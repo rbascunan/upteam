@@ -19,8 +19,8 @@ export function Hero() {
           Mide y premia a tu comunidad, sin planillas.
         </h1>
         <p className="max-w-md text-lg text-muted-foreground text-pretty">
-          Upteam ordena tu programa de embajadores: registra aportes, suma puntos y entrega recompensas de forma
-          transparente.
+          Upteam ordena a los integrantes de tu comunidad: registra aportes, suma puntos y entrega recompensas de
+          forma transparente.
         </p>
         <ul className="flex flex-col gap-3">
           {diferenciales.map(({ icono: Icono, texto }) => (

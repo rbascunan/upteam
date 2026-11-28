@@ -3,18 +3,23 @@ import { Check, Gift, Sparkles, Users, X, BarChart3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function Bloque({
+  id,
   imagen,
   alt,
   invertir,
   children,
 }: {
+  id: string
   imagen: string
   alt: string
   invertir?: boolean
   children: React.ReactNode
 }) {
   return (
-    <section className="mx-auto grid w-full max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-16">
+    <section
+      id={id}
+      className="mx-auto grid w-full max-w-6xl scroll-mt-20 items-center gap-8 px-4 py-12 md:grid-cols-2 md:gap-16"
+    >
       <div className={cn("flex flex-col gap-5", invertir && "md:order-2")}>{children}</div>
       <Image
         src={imagen}
@@ -40,7 +45,7 @@ export function SeccionProblema() {
   const antes = ["Aportes en chats y planillas", "Nadie sabe quién suma más", "Premios sin criterio claro"]
   const ahora = ["Todo registrado en un lugar", "Ranking visible y justo", "Recompensas verificables en Stellar"]
   return (
-    <Bloque imagen="/images/comunidad-3d.png" alt="Ilustración 3D de personas de una comunidad celebrando juntas">
+    <Bloque id="problema" imagen="/images/comunidad-3d.png" alt="Ilustración 3D de personas de una comunidad celebrando juntas">
       <Titulo etiqueta="El problema">Las comunidades crecen con esfuerzo que nadie mide.</Titulo>
       <div className="grid gap-4 sm:grid-cols-2">
         <ul className="flex flex-col gap-2 rounded-2xl bg-card p-5">
@@ -67,7 +72,7 @@ export function SeccionProblema() {
 }
 
 const funciones = [
-  { icono: Users, titulo: "Embajadores", texto: "Perfiles, países y actividad." },
+  { icono: Users, titulo: "Integrantes", texto: "Perfiles, países y actividad." },
   { icono: Sparkles, titulo: "Puntos con IA", texto: "Sugiere cuántos puntos dar." },
   { icono: BarChart3, titulo: "Ranking y niveles", texto: "Progreso claro para todos." },
   { icono: Gift, titulo: "Premios", texto: "Canje de recompensas on-chain." },
@@ -76,6 +81,7 @@ const funciones = [
 export function SeccionFunciones() {
   return (
     <Bloque
+      id="funciones"
       invertir
       imagen="/images/recompensas-3d.png"
       alt="Ilustración 3D de una caja de regalo entregando tokens de recompensa"
@@ -96,7 +102,7 @@ export function SeccionFunciones() {
 
 export function SeccionComunidades() {
   return (
-    <Bloque imagen="/images/mundo-3d.png" alt="Ilustración 3D de un globo terráqueo conectado a comunidades">
+    <Bloque id="comunidades" imagen="/images/mundo-3d.png" alt="Ilustración 3D de un globo terráqueo conectado a comunidades">
       <Titulo etiqueta="Para quién">Hecho por comunidades, para comunidades.</Titulo>
       <p className="text-lg text-muted-foreground text-pretty">
         Lo creamos integrantes de comunidades que vivimos este problema mes a mes. Sirve para comunidades tech, Web3,
