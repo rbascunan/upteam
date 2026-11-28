@@ -204,6 +204,19 @@ pnpm install
 pnpm dev
 ```
 
+## Novedades v2.36 (noviembre 2026)
+
+### Acceso y cuentas
+- Login y registro con email y contraseña (Better Auth sobre Neon Postgres).
+- Contador de sesiones y fecha del último acceso de cada usuario.
+- Corregido el error "Invalid origin" al crear cuenta en producción: ahora se confía en los dominios oficiales del proyecto.
+
+### Identidad del proyecto
+- Pie de página común en el login y en toda la app: "Desarrollado por Betito Bascuñan gracias a Vercel · v2.36 · 10/2026".
+- Sello en el login: "Creado en la blockchain Stellar para registrar movimientos", con el logo de Stellar.
+- Favicon propio, más título, descripción e imagen de vista previa (Open Graph y Twitter Card) para que el enlace se vea bien al compartirlo por WhatsApp y redes.
+
+
 La app queda disponible en `http://localhost:3000`.
 
 ## Variables de entorno
