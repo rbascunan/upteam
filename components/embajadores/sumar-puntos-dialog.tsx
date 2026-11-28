@@ -49,6 +49,9 @@ export function SumarPuntosDialog({ trigger, embajadorIdsIniciales = [], abierto
     return embajadores.filter((e) => e.estado === "activo" && (!t || normalizarTexto(e.nombre).includes(t)))
   }, [embajadores, busqueda])
 
+  const todosVisiblesMarcados = visibles.length > 0 && visibles.every((e) => seleccion.includes(e.id))
+  const algunVisibleMarcado = visibles.some((e) => seleccion.includes(e.id))
+
   const puntosNum = Number(puntos)
   const valido = seleccion.length > 0 && actividad && Number.isInteger(puntosNum) && puntosNum > 0 && fecha <= hoyISO()
 
@@ -83,6 +86,22 @@ export function SumarPuntosDialog({ trigger, embajadorIdsIniciales = [], abierto
               <Input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Filtrar por nombre" className="rounded-xl pl-9" aria-label="Filtrar embajadores" />
             </div>
             <ul className="neu-inset max-h-44 overflow-y-auto rounded-2xl bg-muted/40 p-1.5">
+              {visibles.length > 0 && (
+                <li className="mb-1 border-b border-border/60 pb-1">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-1.5 text-sm font-medium hover:bg-card">
+                    <Checkbox
+                      checked={todosVisiblesMarcados}
+                      indeterminate={!todosVisiblesMarcados && algunVisibleMarcado}
+                      onCheckedChange={(v) => {
+                        const idsVisibles = visibles.map((e) => e.id)
+                        setSeleccion((s) => (v ? Array.from(new Set([...s, ...idsVisibles])) : s.filter((x) => !idsVisibles.includes(x))))
+                      }}
+                    />
+                    <span className="flex-1">{busqueda ? "Seleccionar todos los filtrados" : "Seleccionar todos"}</span>
+                    <span className="text-xs text-muted-foreground">{visibles.length}</span>
+                  </label>
+                </li>
+              )}
               {visibles.map((e) => {
                 const marcado = seleccion.includes(e.id)
                 return (
