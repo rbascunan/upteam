@@ -62,9 +62,9 @@ export function FormularioAcceso() {
         <span className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
           <Sparkles className="size-6" aria-hidden />
         </span>
-        <h1 className="text-2xl font-semibold text-balance">
+        <h2 className="text-2xl font-semibold text-balance">
           {modo === "ingresar" ? "Bienvenido a Upteam" : "Crea tu cuenta"}
-        </h1>
+        </h2>
         <p className="text-sm text-muted-foreground text-pretty">
           {modo === "ingresar"
             ? "Ingresa para administrar el programa de embajadores de tu comunidad."
