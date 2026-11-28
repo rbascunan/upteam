@@ -216,6 +216,25 @@ pnpm dev
 - Sello en el login: "Creado en la blockchain Stellar para registrar movimientos", con el logo de Stellar.
 - Favicon propio, más título, descripción e imagen de vista previa (Open Graph y Twitter Card) para que el enlace se vea bien al compartirlo por WhatsApp y redes.
 
+## Estado del proyecto
+
+**Etapa:** Testnet. Cada movimiento de puntos (sumar, canjear o ajustar) se registra como una transacción en Stellar Testnet con un memo verificable, y la base de datos guarda el hash de esa transacción.
+
+**Demo:** https://v0-upteams.vercel.app
+
+### Cómo verificar un movimiento
+1. En la app, abre el historial de un embajador.
+2. Copia el hash de la transacción.
+3. Búscalo en https://stellar.expert/explorer/testnet
+
+### Próximos pasos (roadmap)
+- [ ] Contrato Soroban para los StellarPoints (emisión y canje on-chain).
+- [ ] Conexión de la wallet de cada embajador con Freighter.
+- [ ] Panel público de transparencia con todos los movimientos de la comunidad.
+- [ ] Pasar a Mainnet cuando terminen las pruebas con usuarios reales.
+
+### Autor
+Desarrollado por **Roberto (Betito) Bascuñan**, [@rbascunan](https://github.com/rbascunan).
 
 La app queda disponible en `http://localhost:3000`.
 
