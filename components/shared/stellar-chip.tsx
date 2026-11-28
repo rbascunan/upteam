@@ -16,7 +16,15 @@ interface Props {
 }
 
 export function StellarChip({ txHash, estado, movimientoId, onReintentar, className }: Props) {
-  const { acciones } = useApp()
+  const { acciones, soloLectura } = useApp()
+
+  if (soloLectura && (estado === "error" || (!txHash && estado !== "historico" && estado !== "pendiente"))) {
+    return (
+      <span className={cn("inline-flex items-center rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground", className)}>
+        Sin confirmar
+      </span>
+    )
+  }
 
   if (estado === "pendiente") {
     return (

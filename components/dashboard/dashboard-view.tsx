@@ -9,6 +9,8 @@ import { RankingWidget } from "@/components/dashboard/ranking-widget"
 import { CumpleanosWidget } from "@/components/dashboard/cumpleanos-widget"
 import { DistribucionNiveles, PuntosPorMes } from "@/components/dashboard/graficos"
 import { SumarPuntosDialog } from "@/components/embajadores/sumar-puntos-dialog"
+import { CompartirEnlaceDialog } from "@/components/dashboard/compartir-enlace-dialog"
+import { EnlaceEmbajador } from "@/components/shared/enlace-embajador"
 import { useDatos } from "@/lib/store"
 import { puntosTotales } from "@/lib/data/calculos"
 import { formatearFecha, formatearNumero, nombreMes } from "@/lib/format"
@@ -27,7 +29,7 @@ function Kpi({ icon, tono, etiqueta, valor, detalle }: { icon: LucideIcon; tono:
 }
 
 export function DashboardView() {
-  const { embajadores, movimientos, premios, actividades, comunidad, permitido } = useDatos()
+  const { embajadores, movimientos, premios, actividades, comunidad, permitido, soloLectura } = useDatos()
   const hoy = new Date()
   const periodoMes = { tipo: "mes" as const, anio: hoy.getFullYear(), mes: hoy.getMonth() + 1 }
   const periodoMesAnterior = (() => {
@@ -45,18 +47,23 @@ export function DashboardView() {
   return (
     <>
       <EncabezadoPagina
-        titulo={`Hola, equipo de ${comunidad.nombre}`}
+        titulo={soloLectura ? `Estado de la comunidad ${comunidad.nombre}` : `Hola, equipo de ${comunidad.nombre}`}
         descripcion={`Resumen de ${nombreMes(periodoMes.mes).toLowerCase()} ${periodoMes.anio}. Todos los puntos se registran como StellarPoints en Stellar Testnet.`}
         acciones={
-          permitido("cargar_puntos") && (
-            <SumarPuntosDialog
-              trigger={
-                <Button className="h-10 rounded-xl px-4 glow-primary">
-                  <Plus className="size-4" aria-hidden />
-                  Sumar puntos
-                </Button>
-              }
-            />
+          !soloLectura && (
+            <>
+              {permitido("configurar") && <CompartirEnlaceDialog />}
+              {permitido("cargar_puntos") && (
+                <SumarPuntosDialog
+                  trigger={
+                    <Button className="h-10 rounded-xl px-4 glow-primary">
+                      <Plus className="size-4" aria-hidden />
+                      Sumar puntos
+                    </Button>
+                  }
+                />
+              )}
+            </>
           )
         }
       />
@@ -92,9 +99,11 @@ export function DashboardView() {
         <PanelHeader
           titulo="Actividad reciente"
           acciones={
-            <Button variant="ghost" size="sm" render={<Link href="/registro" />} nativeButton={false}>
-              Ver registro completo
-            </Button>
+            !soloLectura && (
+              <Button variant="ghost" size="sm" render={<Link href="/registro" />} nativeButton={false}>
+                Ver registro completo
+              </Button>
+            )
           }
         />
         <ul className="flex flex-col divide-y divide-dashed">
@@ -106,9 +115,9 @@ export function DashboardView() {
                 <AvatarIniciales nombre={emb?.nombre ?? "?"} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">
-                    <Link href={`/embajadores/${m.embajadorId}`} className="font-medium hover:underline">
+                    <EnlaceEmbajador id={m.embajadorId} className="font-medium hover:underline">
                       {emb?.nombre}
-                    </Link>{" "}
+                    </EnlaceEmbajador>{" "}
                     <span className="text-muted-foreground">· {act?.nombre}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">{formatearFecha(m.fecha)}</p>

@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { EnlaceEmbajador } from "@/components/shared/enlace-embajador"
 import { Cake } from "lucide-react"
 import { Panel, PanelHeader, BotonCopiar, EstadoVacio, Chip } from "@/components/shared/ui-bits"
 import { Bandera } from "@/components/shared/bandera"
@@ -57,10 +57,10 @@ export function CumpleanosWidget() {
                   <span className="text-[10px] uppercase">{nombreMes(mes, true)}</span>
                 </span>
                 <div className="min-w-0 flex-1">
-                  <Link href={`/embajadores/${e.id}`} className="flex items-center gap-2 hover:underline">
+                  <EnlaceEmbajador id={e.id} className="flex items-center gap-2 hover:underline">
                     <span className="truncate text-sm font-medium">{e.nombre}</span>
                     <Bandera pais={e.pais} />
-                  </Link>
+                  </EnlaceEmbajador>
                   <div className="mt-0.5 text-xs text-muted-foreground">
                     {esHoy ? (
                       <Chip tono="pink" className="px-2 py-0.5 text-[11px]">

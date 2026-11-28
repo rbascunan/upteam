@@ -86,6 +86,13 @@ export const bitacora = pgTable("bitacora", {
   detalle: text("detalle").notNull(),
 })
 
+export const enlacePublico = pgTable("enlace_publico", {
+  id: text("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  activo: boolean("activo").notNull().default(false),
+  actualizadoEn: timestamp("actualizado_en", { withTimezone: true, mode: "string" }).notNull().defaultNow(),
+})
+
 export const cuentasStellar = pgTable("cuentas_stellar", {
   tipo: text("tipo").primaryKey(),
   clavePublica: text("clave_publica").notNull(),

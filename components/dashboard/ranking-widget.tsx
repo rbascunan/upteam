@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Link from "next/link"
+import { EnlaceEmbajador } from "@/components/shared/enlace-embajador"
 import { Trophy } from "lucide-react"
 import { Panel, PanelHeader, AvatarIniciales, EstadoVacio } from "@/components/shared/ui-bits"
 import { SimpleSelect } from "@/components/shared/simple-select"
@@ -82,8 +82,8 @@ export function RankingWidget() {
         <ol className="flex flex-col gap-1">
           {filas.map((f) => (
             <li key={f.embajador.id}>
-              <Link
-                href={`/embajadores/${f.embajador.id}`}
+              <EnlaceEmbajador
+                id={f.embajador.id}
                 className="flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors hover:bg-accent"
               >
                 <span
@@ -108,7 +108,7 @@ export function RankingWidget() {
                   <span className="block text-sm font-bold tabular-nums">{formatearNumero(f.puntos)}</span>
                   <span className="block text-[11px] text-muted-foreground">StellarPoints</span>
                 </span>
-              </Link>
+              </EnlaceEmbajador>
             </li>
           ))}
         </ol>
